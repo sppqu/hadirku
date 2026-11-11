@@ -1,0 +1,4 @@
+nik,name,email,phone,password,role,department,position,shift,office,is_active
+HK-2024010,Ahmad Fauzi,ahmad@hadirku.com,081298765432,password,pegawai,Information Technology,Backend Developer,Shift Regular (08:00 - 17:00),Kantor Pusat HadirKU,1
+HK-2024011,Rina Wijaya,rina@hadirku.com,081398765433,password,pegawai,Human Resource,HR Officer,Shift Regular (08:00 - 17:00),Kantor Pusat HadirKU,1
+HK-2024012,Doni Pratama,doni@hadirku.com,081498765434,password,pegawai,Finance & Accounting,Finance Staff,Shift Regular (08:00 - 17:00),Kantor Pusat HadirKU,1
