@@ -26,4 +26,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/leaves', [DashboardController::class, 'leaves'])->name('user.leaves');
     Route::post('/leaves', [DashboardController::class, 'storeLeave'])->name('user.leaves.store');
     Route::get('/profile', [DashboardController::class, 'profile'])->name('user.profile');
+    Route::post('/profile/avatar', [DashboardController::class, 'updateAvatar'])->name('user.profile.avatar');
+    Route::post('/profile/password', [DashboardController::class, 'updatePassword'])->name('user.profile.password');
+    Route::post('/profile/face-register', [DashboardController::class, 'registerFace'])->name('user.profile.face_register');
+    Route::post('/profile/face-unlock-request', [DashboardController::class, 'requestFaceUnlock'])->name('user.profile.face_unlock_request');
 });

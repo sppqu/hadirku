@@ -23,9 +23,15 @@ class User extends Authenticatable implements FilamentUser
         'role',
         'department_id',
         'shift_id',
+        'working_days',
         'office_id',
         'position',
         'face_reference',
+        'face_reference_status',
+        'pending_face_reference',
+        'face_rejection_reason',
+        'allow_face_registration',
+        'face_unlock_requested',
         'avatar',
         'is_active',
     ];
@@ -41,12 +47,20 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'allow_face_registration' => 'boolean',
+            'face_unlock_requested' => 'boolean',
+            'working_days' => 'array',
         ];
     }
 
     public function canAccessPanel(Panel $panel): bool
     {
-        return $this->role === 'admin' && $this->is_active;
+        // Super Admin selalu memiliki akses penuh ke panel admin
+        if ($this->email === 'admin@hadirku.com' || $this->id === 1) {
+            return true;
+        }
+
+        return $this->role === 'admin' && (bool) $this->is_active;
     }
 
     public function department(): BelongsTo
@@ -85,5 +99,84 @@ class User extends Authenticatable implements FilamentUser
             return asset('storage/' . $this->avatar);
         }
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=0D9488&color=ffffff&bold=true';
+    }
+
+    public function getFaceReferenceUrlAttribute(): ?string
+    {
+        if ($this->face_reference) {
+            return asset('storage/' . $this->face_reference);
+        }
+        return null;
+    }
+
+    public function getPendingFaceReferenceUrlAttribute(): ?string
+    {
+        if ($this->pending_face_reference) {
+            return asset('storage/' . $this->pending_face_reference);
+        }
+        return null;
+    }
+
+    public static function dayOptions(): array
+    {
+        return [
+            1 => 'Senin',
+            2 => 'Selasa',
+            3 => 'Rabu',
+            4 => 'Kamis',
+            5 => 'Jumat',
+            6 => 'Sabtu',
+            7 => 'Minggu',
+        ];
+    }
+
+    public static function dayShortLabels(): array
+    {
+        return [
+            1 => 'Sen',
+            2 => 'Sel',
+            3 => 'Rab',
+            4 => 'Kam',
+            5 => 'Jum',
+            6 => 'Sab',
+            7 => 'Min',
+        ];
+    }
+
+    /**
+     * Cek apakah tanggal tertentu merupakan hari kerja pegawai ini.
+     */
+    public function isWorkingDay(?\Carbon\Carbon $date = null): bool
+    {
+        $targetDate = $date ?? \Carbon\Carbon::today('Asia/Jakarta');
+        $days = $this->working_days;
+
+        // Fallback default Senin-Jumat jika belum diatur
+        if (! is_array($days) || empty($days)) {
+            $days = [1, 2, 3, 4, 5];
+        }
+
+        $normalized = array_map('intval', $days);
+
+        return in_array($targetDate->dayOfWeekIso, $normalized, true);
+    }
+
+    /**
+     * Ringkasan jadwal hari kerja pegawai (misal: "Sen, Rab, Jum").
+     */
+    public function getWorkingDaysSummaryAttribute(): string
+    {
+        $days = $this->working_days;
+        if (! is_array($days) || empty($days)) {
+            $days = [1, 2, 3, 4, 5];
+        }
+
+        $normalized = array_map('intval', $days);
+        sort($normalized);
+        $short = self::dayShortLabels();
+
+        $labels = array_values(array_filter(array_map(fn ($d) => $short[$d] ?? null, $normalized)));
+
+        return implode(', ', $labels);
     }
 }

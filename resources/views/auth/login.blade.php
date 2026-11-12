@@ -48,16 +48,6 @@
 </head>
 <body class="bg-slate-900 text-slate-800 antialiased">
     <div class="mobile-shell flex flex-col justify-between">
-        <!-- Top Status Bar Simulation -->
-        <div class="bg-emerald-600 text-white px-6 pt-3 pb-2 flex justify-between items-center text-xs font-semibold">
-            <span>9:41</span>
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-signal text-[10px]"></i>
-                <i class="fa-solid fa-wifi text-[11px]"></i>
-                <i class="fa-solid fa-battery-full text-xs"></i>
-            </div>
-        </div>
-
         <!-- Header Illustration & Branding -->
         <div class="bg-gradient-to-b from-emerald-600 to-emerald-700 text-white px-8 pt-8 pb-14 rounded-b-[40px] text-center shadow-lg relative overflow-hidden">
             <!-- Decorative circle -->

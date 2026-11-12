@@ -73,6 +73,7 @@
         }
         /* Mobile phone simulation container on desktop */
         .mobile-shell {
+            width: 100%;
             max-width: 440px;
             min-height: 100vh;
             margin: 0 auto;
@@ -97,28 +98,21 @@
         .punch-btn-shadow {
             box-shadow: 0 10px 25px -3px rgba(5, 150, 105, 0.4), 0 4px 6px -4px rgba(5, 150, 105, 0.2);
         }
+        .safe-bottom {
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0.5rem));
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
 
     <div class="mobile-shell flex flex-col hide-scrollbar">
-        <!-- Top Mobile Status Bar (iOS style) -->
-        <div class="bg-app-green text-white px-6 pt-3 pb-1 flex justify-between items-center text-xs font-semibold z-20">
-            <span>9:41</span>
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-signal text-[10px]"></i>
-                <i class="fa-solid fa-wifi text-[11px]"></i>
-                <i class="fa-solid fa-battery-full text-xs"></i>
-            </div>
-        </div>
-
         <!-- Main Content Area -->
         <main class="flex-1 pb-24">
             @yield('content')
         </main>
 
-        <!-- Floating Bottom Navigation Bar (Matches screenshot precisely!) -->
-        <nav class="fixed sm:absolute bottom-0 left-0 right-0 max-w-[440px] mx-auto bg-white border-t border-slate-100 px-4 py-2 flex items-center justify-between z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] rounded-b-[32px]">
+        <!-- Floating Bottom Navigation Bar (Sticky to viewport) -->
+        <nav class="sticky bottom-0 left-0 right-0 w-full max-w-[440px] mx-auto bg-white border-t border-slate-100 px-4 py-2 safe-bottom flex items-center justify-between z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] sm:rounded-b-[32px]">
             <!-- Dashboard -->
             <a href="{{ route('user.dashboard') }}" class="flex flex-col items-center justify-center flex-1 py-1 transition {{ request()->routeIs('user.dashboard') ? 'text-app-green font-bold' : 'text-slate-400 hover:text-slate-600' }}">
                 <i class="fa-solid fa-house text-lg mb-1"></i>

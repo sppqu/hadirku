@@ -200,29 +200,6 @@ class DatabaseSeeder extends Seeder
             AttendanceLog::create([
                 'attendance_id' => $att->id,
                 'user_id' => $john->id,
-                'type' => 'break_start',
-                'date' => $date->toDateString(),
-                'time' => '12:00:00',
-                'latitude' => -6.225010,
-                'longitude' => 106.809780,
-                'distance_meters' => 15,
-                'location_name' => 'Office',
-                'duration' => '00:45',
-            ]);
-            AttendanceLog::create([
-                'attendance_id' => $att->id,
-                'user_id' => $john->id,
-                'type' => 'break_end',
-                'date' => $date->toDateString(),
-                'time' => '12:45:00',
-                'latitude' => -6.225010,
-                'longitude' => 106.809780,
-                'distance_meters' => 15,
-                'location_name' => 'Office',
-            ]);
-            AttendanceLog::create([
-                'attendance_id' => $att->id,
-                'user_id' => $john->id,
                 'type' => 'check_out',
                 'date' => $date->toDateString(),
                 'time' => $checkOutStr,
@@ -265,30 +242,6 @@ class DatabaseSeeder extends Seeder
             'location_name' => 'Office',
             'status' => 'On time',
         ]);
-        AttendanceLog::create([
-            'attendance_id' => $todayAtt->id,
-            'user_id' => $john->id,
-            'type' => 'break_start',
-            'date' => $today->toDateString(),
-            'time' => '13:15:00',
-            'latitude' => -6.225012,
-            'longitude' => 106.809782,
-            'distance_meters' => 12,
-            'location_name' => 'Office',
-            'duration' => '00:45',
-        ]);
-        AttendanceLog::create([
-            'attendance_id' => $todayAtt->id,
-            'user_id' => $john->id,
-            'type' => 'break_end',
-            'date' => $today->toDateString(),
-            'time' => '14:00:00',
-            'latitude' => -6.225012,
-            'longitude' => 106.809782,
-            'distance_meters' => 12,
-            'location_name' => 'Office',
-        ]);
-
         // Today's attendance for Siti
         Attendance::create([
             'user_id' => $siti->id,

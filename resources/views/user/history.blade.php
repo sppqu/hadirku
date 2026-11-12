@@ -145,51 +145,6 @@
                     </div>
                 </div>
 
-                <!-- Break Start Item -->
-                <div class="relative flex items-center justify-between">
-                    <div class="absolute -left-6 w-4 h-4 rounded-full bg-amber-400 border-2 border-white shadow-sm"></div>
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-sm">
-                            <i class="fa-solid fa-mug-saucer"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-800">Break Start</h4>
-                            <div class="flex items-center space-x-2 text-[11px] text-slate-500">
-                                <span class="font-semibold">{{ $selectedAttendance && $selectedAttendance->break_start ? date('h:i A', strtotime($selectedAttendance->break_start)) : '01:15 PM' }}</span>
-                                <span class="text-slate-300">&bull;</span>
-                                <span class="text-slate-400 flex items-center gap-0.5">
-                                    <i class="fa-solid fa-location-dot text-emerald-500 text-[10px]"></i> Office
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="text-[11px] font-medium text-slate-500">
-                            Duration <strong class="text-slate-700">00:45</strong>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Break End Item -->
-                <div class="relative flex items-center justify-between">
-                    <div class="absolute -left-6 w-4 h-4 rounded-full bg-amber-400 border-2 border-white shadow-sm"></div>
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-sm">
-                            <i class="fa-solid fa-mug-saucer"></i>
-                        </div>
-                        <div>
-                            <h4 class="text-xs font-bold text-slate-800">Break End</h4>
-                            <div class="flex items-center space-x-2 text-[11px] text-slate-500">
-                                <span class="font-semibold">{{ $selectedAttendance && $selectedAttendance->break_end ? date('h:i A', strtotime($selectedAttendance->break_end)) : '02:00 PM' }}</span>
-                                <span class="text-slate-300">&bull;</span>
-                                <span class="text-slate-400 flex items-center gap-0.5">
-                                    <i class="fa-solid fa-location-dot text-emerald-500 text-[10px]"></i> Office
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Check Out Item -->
                 <div class="relative flex items-center justify-between">
                     <div class="absolute -left-6 w-4 h-4 rounded-full {{ $selectedAttendance && $selectedAttendance->check_out ? 'bg-emerald-500' : 'bg-red-400' }} border-2 border-white shadow-sm"></div>

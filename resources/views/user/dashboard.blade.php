@@ -3,19 +3,23 @@
 @section('content')
 <div class="relative bg-slate-50 min-h-full">
     <!-- Header Section (Green background with Greeting & Notification) -->
-    <div class="bg-app-green text-white px-5 pt-4 pb-28 relative">
+    <div class="bg-app-green text-white px-5 pt-5 pb-28 relative">
         <div class="flex items-center justify-between mb-4">
-            <!-- Hamburger menu button -->
-            <button type="button" onclick="toggleDrawer()" class="text-white hover:text-emerald-100 p-1.5 -ml-1.5 rounded-lg active:scale-95 transition">
-                <i class="fa-solid fa-bars text-xl"></i>
-            </button>
+            <!-- App Name Branding (Menggantikan menu navigasi samping) -->
+            <div class="flex items-center gap-2.5">
+                <img src="{{ asset('images/logo.jpg') }}" alt="Logo HadirKU" class="w-8 h-8 rounded-xl border border-white/30 object-cover shadow-sm">
+                <div>
+                    <span class="font-extrabold text-base tracking-tight text-white leading-none block">HAdirKu</span>
+                    <span class="text-[9px] text-emerald-200 tracking-wider font-semibold uppercase block mt-0.5">E-Presensi</span>
+                </div>
+            </div>
 
             <!-- Notification Bell with Badge -->
             <div class="relative">
-                <button type="button" onclick="showNotifications()" class="text-white hover:text-emerald-100 p-1.5 rounded-lg active:scale-95 transition">
-                    <i class="fa-regular fa-bell text-xl"></i>
+                <button type="button" onclick="showNotifications()" class="text-white hover:text-emerald-100 p-2 rounded-xl bg-white/10 backdrop-blur-xs active:scale-95 transition">
+                    <i class="fa-regular fa-bell text-lg"></i>
                 </button>
-                <span class="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-app-green">3</span>
+                <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-app-green">3</span>
             </div>
         </div>
 
@@ -29,6 +33,28 @@
 
     <!-- Main Container (Elevated with relative z-10 so it sits ON TOP of the green background) -->
     <div class="px-5 -mt-20 relative z-10 space-y-4">
+
+        @if(!empty($todayHoliday))
+            <div class="bg-rose-50 border border-rose-200 rounded-2xl p-3.5 flex items-center gap-3 shadow-xs">
+                <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-calendar-xmark text-sm"></i>
+                </div>
+                <div class="text-xs">
+                    <div class="font-bold text-rose-900">Hari Libur: {{ $todayHoliday->name }}</div>
+                    <p class="text-[11px] text-rose-700 mt-0.5">{{ $todayHoliday->type === 'national' ? 'Libur Nasional' : 'Libur Kantor / Cuti Bersama' }} &bull; Presensi masuk tidak diperlukan.</p>
+                </div>
+            </div>
+        @elseif(isset($isWorkingDayToday) && ! $isWorkingDayToday)
+            <div class="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 flex items-center gap-3 shadow-xs">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center flex-shrink-0">
+                    <i class="fa-solid fa-calendar-day text-sm"></i>
+                </div>
+                <div class="text-xs">
+                    <div class="font-bold text-amber-900">Di Luar Jadwal Hari Kerja</div>
+                    <p class="text-[11px] text-amber-700 mt-0.5">Jadwal hari kerja Anda: <span class="font-semibold">{{ $user->working_days_summary }}</span>.</p>
+                </div>
+            </div>
+        @endif
 
         <!-- Card: Today's Status (Matches Screenshot 1) -->
         <div class="bg-white rounded-3xl p-5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.06),0_8px_10px_-6px_rgba(0,0,0,0.04)] border border-slate-100">
@@ -86,45 +112,21 @@
                     </span>
                 </div>
             </div>
-        </div>
 
-        <!-- 4 Quick Stat Pill Cards (Grid 4 columns) -->
-        <div class="grid grid-cols-4 gap-2">
-            <!-- Punch In -->
-            <div class="bg-white p-2.5 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center justify-center">
-                <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-1.5 text-xs">
-                    <i class="fa-regular fa-calendar-check"></i>
+            @if($todayAttendance && $todayAttendance->status === 'pending')
+                <div class="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs text-amber-950">
+                    <div class="flex items-center space-x-2.5">
+                        <div class="w-7 h-7 rounded-lg bg-amber-200/80 text-amber-800 flex items-center justify-center text-xs flex-shrink-0">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-[11px] leading-tight">Presensi di Luar Radius</div>
+                            <div class="text-[10px] text-amber-800/80 leading-tight mt-0.5">Status PENDING &bull; Menunggu persetujuan Admin</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-extrabold bg-amber-500 text-white px-2.5 py-0.5 rounded-full shadow-xs">Pending</span>
                 </div>
-                <span class="text-[10px] font-medium text-slate-400 block">Punch In</span>
-                <span class="text-[11px] font-bold text-slate-800 block mt-0.5">{{ $punchInTime }}</span>
-            </div>
-
-            <!-- Punch Out -->
-            <div class="bg-white p-2.5 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center justify-center">
-                <div class="w-8 h-8 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center mb-1.5 text-xs">
-                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                </div>
-                <span class="text-[10px] font-medium text-slate-400 block">Punch Out</span>
-                <span class="text-[11px] font-bold text-slate-800 block mt-0.5">{{ $punchOutTime }}</span>
-            </div>
-
-            <!-- Break -->
-            <div class="bg-white p-2.5 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center justify-center">
-                <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center mb-1.5 text-xs">
-                    <i class="fa-solid fa-mug-saucer"></i>
-                </div>
-                <span class="text-[10px] font-medium text-slate-400 block">Break</span>
-                <span class="text-[11px] font-bold text-slate-800 block mt-0.5">{{ $breakDurationFormatted }}</span>
-            </div>
-
-            <!-- Total Hours -->
-            <div class="bg-white p-2.5 rounded-2xl border border-slate-100 shadow-sm text-center flex flex-col items-center justify-center">
-                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1.5 text-xs">
-                    <i class="fa-regular fa-clock"></i>
-                </div>
-                <span class="text-[10px] font-medium text-slate-400 block">Total Hours</span>
-                <span class="text-[11px] font-bold text-slate-800 block mt-0.5">{{ $workingHoursFormatted }}</span>
-            </div>
+            @endif
         </div>
 
         <!-- Attendance Overview (Weekly Bar) -->
@@ -210,8 +212,8 @@
                                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                                 </div>
                             @else
-                                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-500 flex items-center justify-center text-sm flex-shrink-0">
-                                    <i class="fa-solid fa-mug-saucer"></i>
+                                <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-sm flex-shrink-0">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
                                 </div>
                             @endif
 
@@ -240,90 +242,7 @@
     </div>
 </div>
 
-<!-- Slide-out Drawer Menu -->
-<div id="drawer-backdrop" onclick="toggleDrawer()" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity"></div>
-<div id="drawer-menu" class="fixed top-0 left-0 bottom-0 w-72 bg-white z-50 transform -translate-x-full transition-transform duration-300 shadow-2xl flex flex-col justify-between">
-    <div>
-        <!-- Drawer Header with Official HadirKU Logo -->
-        <div class="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white p-5">
-            <div class="flex items-center gap-4 mb-4">
-                <img src="{{ asset('images/logo.jpg') }}" alt="Logo HadirKU" class="w-12 h-12 rounded-2xl border-2 border-white/30 object-cover shadow-md flex-shrink-0">
-                <div class="pl-0.5">
-                    <h2 class="font-extrabold text-base tracking-tight text-white leading-none">HAdirKu</h2>
-                    <p class="text-[9px] text-emerald-200 tracking-wider font-semibold uppercase mt-1">PRESENSI &bull; MUDAH &bull; TERPERCAYA</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3.5 bg-black/15 p-2.5 rounded-2xl backdrop-blur-xs">
-                <img src="{{ $user->avatar_url }}" alt="Avatar" class="w-10 h-10 rounded-full border border-white/40 object-cover">
-                <div class="overflow-hidden">
-                    <h3 class="font-bold text-xs text-white truncate">{{ $user->name }}</h3>
-                    <p class="text-[10px] text-emerald-100 font-mono">{{ $user->nik ?? 'HK-PEG' }} &bull; {{ $user->position ?? 'Pegawai' }}</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Navigation Links -->
-        <div class="p-4 space-y-1 text-sm font-medium text-slate-700">
-            <a href="{{ route('user.dashboard') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold">
-                <i class="fa-solid fa-house w-5 text-center text-emerald-600"></i>
-                <span>Dashboard</span>
-            </a>
-            <a href="{{ route('user.history') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition">
-                <i class="fa-regular fa-clock w-5 text-center text-slate-400"></i>
-                <span>Riwayat Kehadiran</span>
-            </a>
-            <a href="{{ route('user.leaves') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition">
-                <i class="fa-solid fa-calendar-day w-5 text-center text-slate-400"></i>
-                <span>Pengajuan Izin / Cuti</span>
-            </a>
-            <a href="{{ route('user.profile') }}" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 transition">
-                <i class="fa-regular fa-user w-5 text-center text-slate-400"></i>
-                <span>Profil Pegawai</span>
-            </a>
-
-            <!-- Install App Quick Button -->
-            <button type="button" onclick="installPwa()" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-emerald-700 hover:bg-emerald-50 transition text-left">
-                <i class="fa-solid fa-download w-5 text-center text-emerald-600"></i>
-                <span class="font-semibold">Pasang Aplikasi (PWA)</span>
-            </button>
-
-            @if($user->role === 'admin')
-                <div class="pt-3 border-t border-slate-100 my-2"></div>
-                <a href="/admin" class="flex items-center space-x-3 px-3 py-2.5 rounded-xl bg-amber-50 text-amber-800 font-bold border border-amber-200">
-                    <i class="fa-solid fa-shield-halved w-5 text-center text-amber-600"></i>
-                    <span>Buka Panel Admin</span>
-                </a>
-            @endif
-        </div>
-    </div>
-
-    <!-- Drawer Footer -->
-    <div class="p-4 border-t border-slate-100">
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="w-full flex items-center justify-center space-x-2 py-2.5 px-4 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl font-bold text-xs transition">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                <span>Keluar Akun (Logout)</span>
-            </button>
-        </form>
-    </div>
-</div>
-
 <script>
-    function toggleDrawer() {
-        const drawer = document.getElementById('drawer-menu');
-        const backdrop = document.getElementById('drawer-backdrop');
-        const isClosed = drawer.classList.contains('-translate-x-full');
-        if (isClosed) {
-            drawer.classList.remove('-translate-x-full');
-            backdrop.classList.remove('hidden');
-        } else {
-            drawer.classList.add('-translate-x-full');
-            backdrop.classList.add('hidden');
-        }
-    }
-
     function showNotifications() {
         Swal.fire({
             title: 'Notifikasi',

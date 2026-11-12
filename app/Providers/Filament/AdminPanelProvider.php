@@ -2,7 +2,8 @@
 
 namespace App\Providers\Filament;
 
-use Filament\Http\Middleware\Authenticate;
+use App\Filament\Pages\AdminProfile;
+use App\Http\Middleware\FilamentAuthenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -39,9 +40,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 MenuItem::make()
-                    ->label('Dashboard Mobile Pegawai')
-                    ->url('/dashboard')
-                    ->icon('heroicon-o-device-phone-mobile'),
+                    ->label('Profile')
+                    ->url(fn (): string => AdminProfile::getUrl())
+                    ->icon('heroicon-o-user-circle'),
             ])
             ->navigationGroups([
                 NavigationGroup::make('Presensi & Kehadiran'),
@@ -70,7 +71,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                FilamentAuthenticate::class,
             ]);
     }
 }

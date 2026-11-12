@@ -58,6 +58,7 @@ class AttendanceResource extends Resource
                             ->label('Status Kehadiran')
                             ->options([
                                 'present' => 'Hadir',
+                                'pending' => 'Pending (Luar Radius)',
                                 'late' => 'Terlambat',
                                 'half_day' => 'Setengah Hari',
                                 'absent' => 'Alpha / Tidak Hadir',
@@ -131,6 +132,25 @@ class AttendanceResource extends Resource
                     ->falseIcon('heroicon-o-x-circle')
                     ->trueColor('success')
                     ->falseColor('danger'),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'present' => 'success',
+                        'pending' => 'warning',
+                        'late' => 'danger',
+                        'half_day' => 'warning',
+                        'absent' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'present' => 'Hadir',
+                        'pending' => 'Pending (Luar Radius)',
+                        'late' => 'Terlambat',
+                        'half_day' => 'Setengah Hari',
+                        'absent' => 'Alpha',
+                        default => ucfirst($state),
+                    }),
             ])
             ->filters([
                 Tables\Filters\Filter::make('date')
@@ -143,6 +163,14 @@ class AttendanceResource extends Resource
                             ->when($data['from'], fn (Builder $q, $date) => $q->whereDate('date', '>=', $date))
                             ->when($data['until'], fn (Builder $q, $date) => $q->whereDate('date', '<=', $date));
                     }),
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status Kehadiran')
+                    ->options([
+                        'pending' => 'Pending (Luar Radius)',
+                        'present' => 'Hadir',
+                        'late' => 'Terlambat',
+                        'absent' => 'Alpha',
+                    ]),
                 Tables\Filters\SelectFilter::make('department')
                     ->relationship('user.department', 'name')
                     ->label('Departemen'),
@@ -154,6 +182,19 @@ class AttendanceResource extends Resource
                     ]),
             ])
             ->actions([
+                Tables\Actions\Action::make('approve')
+                    ->label('Setujui')
+                    ->icon('heroicon-m-check-badge')
+                    ->color('success')
+                    ->button()
+                    ->requiresConfirmation()
+                    ->modalHeading('Setujui Presensi Luar Radius')
+                    ->modalDescription('Apakah Anda yakin ingin menyetujui presensi luar radius ini menjadi Hadir?')
+                    ->visible(fn (Attendance $record): bool => $record->status === 'pending')
+                    ->action(function (Attendance $record) {
+                        $record->status = $record->check_in_status === 'late' ? 'late' : 'present';
+                        $record->save();
+                    }),
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),

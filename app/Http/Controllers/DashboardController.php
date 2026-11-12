@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\AttendanceLog;
+use App\Models\Holiday;
 use App\Models\Leave;
 use App\Models\Office;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
@@ -101,12 +103,13 @@ class DashboardController extends Controller
         $lateCount = $monthAttendances->where('check_in_status', 'late')->count();
         $absentCount = 0; // can be computed against working days passed
         
-        // Count working days passed without attendance
+        // Count working days passed without attendance (berdasarkan jadwal hari kerja pegawai & hari libur)
+        $holidayDates = Holiday::getActiveDatesBetween($startOfMonth, $endOfMonth);
         $daysPassed = min($today->day, $startOfMonth->daysInMonth);
         $totalWorkDaysSoFar = 0;
         for ($d = 1; $d <= $daysPassed; $d++) {
             $chkDate = $startOfMonth->copy()->setDay($d);
-            if (! $chkDate->isSunday()) {
+            if ($user->isWorkingDay($chkDate) && ! in_array($chkDate->toDateString(), $holidayDates, true)) {
                 $totalWorkDaysSoFar++;
             }
         }
@@ -118,14 +121,16 @@ class DashboardController extends Controller
         $monthMins = $totalMonthMinutes % 60;
         $totalMonthHoursFormatted = sprintf('%d:%02d', $monthHours, $monthMins);
 
-        // Recent Activities (Today's logs or latest 5 logs)
+        // Recent Activities (Today's logs or latest 4 logs) - Tanpa Break Start dan Break End
         $recentActivities = AttendanceLog::where('user_id', $user->id)
+            ->whereNotIn('type', ['break_start', 'break_end'])
             ->whereDate('date', $today->toDateString())
             ->orderBy('time', 'asc')
             ->get();
 
         if ($recentActivities->isEmpty()) {
             $recentActivities = AttendanceLog::where('user_id', $user->id)
+                ->whereNotIn('type', ['break_start', 'break_end'])
                 ->orderBy('date', 'desc')
                 ->orderBy('time', 'desc')
                 ->take(4)
@@ -134,6 +139,10 @@ class DashboardController extends Controller
 
         // Active Office for Geofencing
         $office = $user->office ?: Office::where('is_active', true)->first();
+
+        // Status hari libur & hari kerja pegawai hari ini
+        $todayHoliday = Holiday::getHolidayForDate($today);
+        $isWorkingDayToday = $user->isWorkingDay($today);
 
         return view('user.dashboard', compact(
             'user',
@@ -151,7 +160,9 @@ class DashboardController extends Controller
             'lateCount',
             'totalMonthHoursFormatted',
             'recentActivities',
-            'office'
+            'office',
+            'todayHoliday',
+            'isWorkingDayToday'
         ));
     }
 
@@ -182,27 +193,36 @@ class DashboardController extends Controller
         $totalHours = sprintf('%d:%02d', floor($totalMinutes / 60), $totalMinutes % 60);
 
         // Days in Month for calendar picker
+        $holidayDates = Holiday::getActiveDatesBetween(
+            $currentMonthDate->copy()->startOfMonth(),
+            $currentMonthDate->copy()->endOfMonth()
+        );
         $calendarDays = [];
         $daysInMonth = $currentMonthDate->daysInMonth;
         for ($day = 1; $day <= $daysInMonth; $day++) {
             $date = $currentMonthDate->copy()->setDay($day);
             $dateStr = $date->toDateString();
             $att = $attendances->get($dateStr);
+            $isHoliday = in_array($dateStr, $holidayDates, true);
+            $isWorkDay = $user->isWorkingDay($date) && ! $isHoliday;
 
             $calendarDays[] = [
                 'day_num' => $day,
                 'day_name' => strtoupper($date->format('D')),
                 'date_str' => $dateStr,
                 'is_sunday' => $date->isSunday(),
+                'is_holiday' => $isHoliday,
+                'is_working_day' => $isWorkDay,
                 'is_selected' => $dateStr === $selectedDate,
                 'has_attendance' => (bool) $att,
-                'status' => $att ? $att->check_in_status : ($date->isPast() && ! $date->isSunday() ? 'absent' : 'upcoming'),
+                'status' => $att ? $att->check_in_status : ($date->isPast() && $isWorkDay ? 'absent' : ($isHoliday ? 'holiday' : 'upcoming')),
             ];
         }
 
         // Selected day attendance details and logs
         $selectedAttendance = $attendances->get($selectedDate);
         $selectedLogs = AttendanceLog::where('user_id', $user->id)
+            ->whereNotIn('type', ['break_start', 'break_end'])
             ->whereDate('date', $selectedDate)
             ->orderBy('time', 'asc')
             ->get();
@@ -227,7 +247,7 @@ class DashboardController extends Controller
     public function punch(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:check_in,break_start,break_end,check_out',
+            'type' => 'required|in:check_in,check_out',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'photo' => 'required|string', // Base64 image data URL
@@ -254,15 +274,7 @@ class DashboardController extends Controller
 
         $allowedRadius = $office->radius_meters ?: 100;
         $isWithinRadius = $distance <= $allowedRadius;
-
-        if (! $isWithinRadius) {
-            return response()->json([
-                'success' => false,
-                'message' => "Anda berada di luar radius kantor! Jarak Anda: {$distance} meter (Maksimal: {$allowedRadius} meter).",
-                'distance' => $distance,
-                'radius' => $allowedRadius,
-            ], 422);
-        }
+        $isPendingApproval = ! $isWithinRadius;
 
         // Save Selfie Photo
         $photoPath = null;
@@ -275,6 +287,24 @@ class DashboardController extends Controller
         }
 
         $now = Carbon::now('Asia/Jakarta');
+
+        if ($request->type === 'check_in') {
+            $todayHoliday = Holiday::getHolidayForDate($now);
+            if ($todayHoliday) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Hari ini adalah Hari Libur ({$todayHoliday->name}). Presensi masuk tidak diperlukan.",
+                ], 422);
+            }
+
+            if (! $user->isWorkingDay($now)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Hari ini bukan jadwal hari kerja Anda ({$user->working_days_summary}).",
+                ], 422);
+            }
+        }
+
         $todayStr = $now->toDateString();
         $timeStr = $now->toTimeString();
 
@@ -286,12 +316,12 @@ class DashboardController extends Controller
             ],
             [
                 'office_id' => $office->id,
-                'status' => 'present',
+                'status' => $isPendingApproval ? 'pending' : 'present',
                 'face_verified' => true,
             ]
         );
 
-        $logStatus = 'On time';
+        $logStatus = $isPendingApproval ? 'Pending (Luar Radius)' : 'On time';
         $logDuration = null;
 
         switch ($request->type) {
@@ -320,8 +350,8 @@ class DashboardController extends Controller
                 $attendance->check_in_distance = $distance;
                 $attendance->check_in_photo = $photoPath;
                 $attendance->check_in_status = $isLate ? 'late' : 'on_time';
-                $attendance->status = $isLate ? 'late' : 'present';
-                $logStatus = $isLate ? 'Late' : 'On time';
+                $attendance->status = $isPendingApproval ? 'pending' : ($isLate ? 'late' : 'present');
+                $logStatus = $isPendingApproval ? 'Pending (Luar Radius)' : ($isLate ? 'Late' : 'On time');
                 break;
 
             case 'break_start':
@@ -349,13 +379,25 @@ class DashboardController extends Controller
                 if (! $attendance->check_in) {
                     return response()->json(['success' => false, 'message' => 'Silakan Check In terlebih dahulu sebelum Check Out.'], 422);
                 }
+                if ($attendance->check_out) {
+                    return response()->json(['success' => false, 'message' => 'Anda sudah melakukan Check Out hari ini pada pukul ' . date('H:i', strtotime($attendance->check_out))], 422);
+                }
                 $attendance->check_out = $timeStr;
                 $attendance->check_out_lat = $request->latitude;
                 $attendance->check_out_lng = $request->longitude;
                 $attendance->check_out_distance = $distance;
                 $attendance->check_out_photo = $photoPath;
                 $attendance->check_out_status = 'normal';
-                $logStatus = 'Completed';
+                
+                if ($isPendingApproval) {
+                    $attendance->status = 'pending';
+                    $logStatus = 'Completed (Pending Approval)';
+                } else {
+                    if ($attendance->status !== 'pending') {
+                        $attendance->status = 'present';
+                    }
+                    $logStatus = 'Completed';
+                }
                 break;
         }
 
@@ -373,16 +415,22 @@ class DashboardController extends Controller
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
             'distance_meters' => $distance,
-            'location_name' => $office->name,
+            'location_name' => $isPendingApproval ? 'Luar Radius (' . $distance . 'm)' : ($office->name ?: 'Office'),
             'photo_path' => $photoPath,
             'status' => $logStatus,
             'duration' => $logDuration,
             'notes' => $request->notes,
         ]);
 
+        $actionLabel = $request->type === 'check_in' ? 'Check In' : 'Check Out';
+        $message = $isPendingApproval
+            ? "Presensi {$actionLabel} berhasil dicatat di luar radius ({$distance} meter)! Status saat ini PENDING dan sedang menunggu persetujuan Admin."
+            : "Presensi {$actionLabel} berhasil dicatat!";
+
         return response()->json([
             'success' => true,
-            'message' => 'Presensi ' . ucfirst(str_replace('_', ' ', $request->type)) . ' berhasil dicatat!',
+            'message' => $message,
+            'is_pending' => $isPendingApproval,
             'type' => $request->type,
             'time' => date('h:i A', strtotime($timeStr)),
             'distance' => $distance,
@@ -435,6 +483,157 @@ class DashboardController extends Controller
     {
         $user = Auth::user()->load(['department', 'shift', 'office']);
         return view('user.profile', compact('user'));
+    }
+
+    /**
+     * Update User Profile Photo / Avatar
+     */
+    public function updateAvatar(Request $request)
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ], [
+            'avatar.required' => 'Silakan pilih file foto terlebih dahulu.',
+            'avatar.image' => 'File harus berupa gambar.',
+            'avatar.mimes' => 'Format foto harus berupa JPG, PNG, atau WEBP.',
+            'avatar.max' => 'Ukuran foto maksimal 5 MB.',
+        ]);
+
+        $user = Auth::user();
+
+        // Delete old avatar if exists in public storage
+        if ($user->avatar && Storage::disk('public')->exists($user->avatar)) {
+            Storage::disk('public')->delete($user->avatar);
+        }
+
+        // Store new avatar
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->avatar = $path;
+        $user->save();
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Foto profil berhasil diperbarui!',
+                'avatar_url' => $user->avatar_url,
+            ]);
+        }
+
+        return back()->with('success', 'Foto profil berhasil diperbarui!');
+    }
+
+    /**
+     * Update User Password
+     */
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ], [
+            'current_password.required' => 'Kata sandi saat ini wajib diisi.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.min' => 'Kata sandi baru minimal 6 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+        ]);
+
+        $user = Auth::user();
+
+        if (! Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'Kata sandi saat ini yang Anda masukkan salah.'])->withInput();
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        return back()->with('success', 'Kata sandi berhasil diperbarui! Silakan gunakan kata sandi baru saat login.');
+    }
+
+    /**
+     * Register or Update Reference Face for Biometric Matching
+     * (Alur persetujuan admin: status pending -> diverifikasi admin -> dikunci)
+     */
+    public function registerFace(Request $request)
+    {
+        $user = Auth::user();
+
+        // Validasi izin registrasi oleh admin
+        if (! $user->allow_face_registration) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Fitur registrasi wajah saat ini terkunci. Silakan ajukan permohonan ke Admin untuk membuka izin pendaftaran wajah.',
+            ], 403);
+        }
+
+        $request->validate([
+            'photo' => 'required|string',
+        ], [
+            'photo.required' => 'Foto wajah harus diambil terlebih dahulu.',
+        ]);
+
+        if (! str_starts_with($request->photo, 'data:image')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Format foto wajah tidak valid.',
+            ], 422);
+        }
+
+        $imageData = preg_replace('#^data:image/\w+;base64,#i', '', $request->photo);
+        $imageData = base64_decode($imageData);
+
+        if (! $imageData) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data gambar tidak dapat diproses.',
+            ], 422);
+        }
+
+        // Hapus pengajuan pending sebelumnya jika ada
+        if ($user->pending_face_reference && Storage::disk('public')->exists($user->pending_face_reference)) {
+            Storage::disk('public')->delete($user->pending_face_reference);
+        }
+
+        // Simpan foto pengajuan wajah ke disk public
+        $fileName = 'faces/' . $user->id . '_pending_' . time() . '.jpg';
+        Storage::disk('public')->put($fileName, $imageData);
+
+        // Update status menjadi pending, dan KUNCI izin registrasi sampai admin memverifikasi
+        $user->pending_face_reference = $fileName;
+        $user->face_reference_status = 'pending';
+        $user->face_rejection_reason = null;
+        $user->allow_face_registration = false; // Registrasi otomatis terkunci
+        $user->face_unlock_requested = false;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'status' => 'pending',
+            'message' => 'Foto wajah berhasil dikirim dan saat ini Menunggu Persetujuan Admin. Admin akan memeriksa apakah akun tersebut benar wajah milik Anda sebelum disetujui.',
+            'face_url' => asset('storage/' . $fileName),
+        ]);
+    }
+
+    /**
+     * Request Admin to Unlock Face Registration
+     */
+    public function requestFaceUnlock(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->face_reference_status === 'pending') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pendaftaran wajah Anda masih dalam antrean verifikasi oleh Admin.',
+            ], 422);
+        }
+
+        $user->face_unlock_requested = true;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Permintaan buka kunci pendaftaran wajah telah dikirimkan ke Admin.',
+        ]);
     }
 
     /**
