@@ -12,20 +12,22 @@
                                 Terapkan Filter
                             </x-filament::button>
 
-                            <button 
+                            <x-filament::button 
                                 type="button" 
-                                onclick="window.print()" 
-                                class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition gap-2 cursor-pointer"
+                                color="success" 
+                                icon="heroicon-m-printer" 
+                                onclick="window.print()"
+                                class="btn-print-action cursor-pointer"
+                                style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;"
                             >
-                                <x-heroicon-m-printer class="w-5 h-5" />
                                 Cetak Laporan (Landscape)
-                            </button>
+                            </x-filament::button>
                         </div>
 
-                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                            <x-filament::badge color="success" size="sm">
                                 Format: Landscape
-                            </span>
+                            </x-filament::badge>
                             <span>Cetak langsung dengan Kop Resmi Kampus & tabel rekapitulasi</span>
                         </div>
                     </div>
@@ -399,6 +401,37 @@
 
     {{-- Comprehensive Styling for Screen Preview & Landscape Official Report Printing --}}
     <style>
+        /* Print Action Button (Ensures high visibility in both light & dark themes) */
+        .btn-print-action,
+        button.btn-print-action,
+        .btn-print-action.fi-btn {
+            background-color: #059669 !important;
+            color: #ffffff !important;
+            border: 1px solid #047857 !important;
+            font-weight: 600 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+        }
+        .btn-print-action:hover,
+        button.btn-print-action:hover,
+        .btn-print-action.fi-btn:hover {
+            background-color: #047857 !important;
+            color: #ffffff !important;
+        }
+        .dark .btn-print-action,
+        .dark button.btn-print-action,
+        .dark .btn-print-action.fi-btn {
+            background-color: #10b981 !important;
+            color: #ffffff !important;
+            border: 1px solid #059669 !important;
+        }
+        .dark .btn-print-action:hover,
+        .dark button.btn-print-action:hover,
+        .dark .btn-print-action.fi-btn:hover {
+            background-color: #059669 !important;
+        }
+
         /* Screen Metrics Grid */
         .report-metrics-grid {
             display: grid;
@@ -901,12 +934,23 @@
                 margin: 8mm 10mm 10mm 10mm;
             }
 
-            /* Force browser print graphics & background colors */
-            *, *::before, *::after {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
+            /* Reset EVERYTHING to pure white background and black text (removes all gray tints & dark mode backgrounds) */
+            *, *::before, *::after,
+            html, body,
+            html.dark, body.dark,
+            .dark, .dark * {
+                background: transparent !important;
+                background-color: transparent !important;
+                background-image: none !important;
+                color: #000000 !important;
                 box-shadow: none !important;
                 text-shadow: none !important;
+                filter: none !important;
+            }
+
+            html, body {
+                background: #ffffff !important;
+                background-color: #ffffff !important;
             }
 
             /* Hide all Filament admin navigation chrome & web filters */
@@ -930,8 +974,6 @@
             }
 
             /* Reset all root containers to prevent overflow truncation & blank pages */
-            html,
-            body,
             .fi-body,
             .fi-layout,
             .fi-main-ctn,
@@ -941,7 +983,8 @@
             .space-y-6 {
                 margin: 0 !important;
                 padding: 0 !important;
-                background: #ffffff !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
                 width: 100% !important;
                 max-width: 100% !important;
@@ -958,7 +1001,7 @@
                 display: none !important;
             }
 
-            /* Style Printable Report Paper */
+            /* Style Printable Report Paper - Clean White Paper Without Shadows/Borders */
             .print-area, .report-paper {
                 display: block !important;
                 position: static !important;
@@ -968,7 +1011,8 @@
                 border: none !important;
                 border-radius: 0 !important;
                 box-shadow: none !important;
-                background: #ffffff !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
                 overflow: visible !important;
             }
@@ -984,10 +1028,12 @@
             }
             .report-kop-logo-box {
                 width: 70px !important;
+                background: transparent !important;
             }
             .report-kop-logo {
                 max-height: 65px !important;
                 max-width: 65px !important;
+                background: transparent !important;
             }
             .report-kop-details {
                 color: #000000 !important;
@@ -1008,10 +1054,12 @@
             .separator-thick {
                 height: 2.5px !important;
                 background-color: #000000 !important;
+                background: #000000 !important;
             }
             .separator-thin {
                 height: 1px !important;
                 background-color: #000000 !important;
+                background: #000000 !important;
                 margin-top: 1.5px !important;
             }
 
@@ -1026,8 +1074,9 @@
                 margin-bottom: 6px !important;
             }
             .report-meta-box {
-                background-color: #ffffff !important;
-                border: 1px solid #666666 !important;
+                background: transparent !important;
+                background-color: transparent !important;
+                border: 1px solid #000000 !important;
                 border-radius: 0 !important;
                 padding: 4px 8px !important;
                 font-size: 7.5pt !important;
@@ -1043,54 +1092,60 @@
                 color: #000000 !important;
             }
 
-            /* Summary Table in Print */
+            /* Summary Table in Print - Clean White */
             .report-summary-container {
                 margin-bottom: 8px !important;
                 page-break-inside: avoid !important;
             }
             .report-summary-table {
                 font-size: 7.5pt !important;
+                background: transparent !important;
             }
             .report-summary-table th {
-                background-color: #f1f5f9 !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
-                border: 1px solid #333333 !important;
+                border: 1px solid #000000 !important;
                 padding: 3px 6px !important;
             }
             .report-summary-table td {
-                background-color: #ffffff !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
-                border: 1px solid #333333 !important;
+                border: 1px solid #000000 !important;
                 padding: 4px 6px !important;
                 font-size: 8.5pt !important;
             }
 
-            /* Main Tables in Print */
+            /* Main Tables in Print - Pure White Background with Clean Black Borders */
             .report-table-scroll, .overflow-x-auto {
                 overflow: visible !important;
                 width: 100% !important;
+                background: transparent !important;
             }
             .report-table {
                 width: 100% !important;
                 border-collapse: collapse !important;
                 table-layout: auto !important;
+                background: transparent !important;
             }
             .matrix-table {
                 font-size: 6.8pt !important;
                 line-height: 1.15 !important;
             }
             .report-table th, .report-table td {
-                border: 1px solid #333333 !important;
+                border: 1px solid #000000 !important;
                 color: #000000 !important;
+                background: transparent !important;
+                background-color: transparent !important;
             }
             .report-table th {
-                background-color: #f1f5f9 !important;
                 color: #000000 !important;
                 padding: 2.5px 1.5px !important;
+                font-weight: 700 !important;
             }
             .report-table td {
                 padding: 2px 1.5px !important;
-                background-color: #ffffff !important;
             }
 
             /* Multi-page table headers */
@@ -1131,12 +1186,10 @@
             .col-inout {
                 font-size: 5.5pt !important;
             }
-            .day-off-header {
-                background-color: #e5e7eb !important;
+            .day-off-header, .day-off-cell {
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
-            }
-            .day-off-cell {
-                background-color: #f3f4f6 !important;
             }
             .cell-time {
                 font-size: 6.2pt !important;
@@ -1157,8 +1210,9 @@
                 color: #444444 !important;
             }
             .badge-sakit, .badge-izin, .badge-alpha {
-                border: 1px solid #333333 !important;
-                background: #ffffff !important;
+                border: 1px solid #000000 !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
                 padding: 0 2px !important;
                 font-size: 6pt !important;
@@ -1168,7 +1222,8 @@
                 padding: 1.5px 0.5px !important;
             }
             .rekap-s, .rekap-i, .rekap-a, .rekap-t {
-                background-color: #f1f5f9 !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
             }
             .cell-rekap {
@@ -1184,8 +1239,9 @@
                 padding: 3px 5px !important;
             }
             .status-badge {
-                border: 1px solid #333333 !important;
-                background: #ffffff !important;
+                border: 1px solid #000000 !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
                 padding: 1px 4px !important;
                 font-size: 6.5pt !important;
@@ -1200,16 +1256,18 @@
             .report-legend-box {
                 margin-top: 8px !important;
                 padding: 4px 6px !important;
-                background-color: #ffffff !important;
-                border: 1px solid #666666 !important;
+                background: transparent !important;
+                background-color: transparent !important;
+                border: 1px solid #000000 !important;
                 border-radius: 0 !important;
                 font-size: 6.8pt !important;
                 color: #000000 !important;
                 page-break-inside: avoid !important;
             }
             .legend-badge {
-                border: 1px solid #333333 !important;
-                background: #ffffff !important;
+                border: 1px solid #000000 !important;
+                background: transparent !important;
+                background-color: transparent !important;
                 color: #000000 !important;
                 width: 14px !important;
                 height: 14px !important;
