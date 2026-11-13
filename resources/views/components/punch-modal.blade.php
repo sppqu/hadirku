@@ -49,7 +49,7 @@
                 <img src="{{ asset('images/logo.jpg') }}" alt="Logo" class="w-9 h-9 rounded-xl border border-white/30 object-cover shadow-sm flex-shrink-0">
                 <div class="pl-0.5">
                     <h3 class="font-bold text-sm leading-tight">Presensi HadirKU</h3>
-                    <p class="text-[10px] text-emerald-100 font-medium mt-0.5">GPS Geofencing & Verifikasi Wajah</p>
+                    <p class="text-[10px] text-emerald-100 font-medium mt-0.5">Verifikasi Wajah Presensi</p>
                 </div>
             </div>
             <button type="button" onclick="closePunchModal()" class="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center active:scale-95 transition">
@@ -97,49 +97,6 @@
                         <i class="fa-solid fa-rotate-right"></i>
                         <span>Ulangi Deteksi Foto Wajah</span>
                     </button>
-                </div>
-            </div>
-
-            <!-- GPS Geofencing Info Section (Tanpa Map) -->
-            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <div class="flex items-center justify-between mb-2.5">
-                    <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                        <i class="fa-solid fa-location-dot text-emerald-600"></i>
-                        <span>Informasi Lokasi & Geofencing</span>
-                    </span>
-                    <button type="button" onclick="getCurrentLocation()" class="text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition">
-                        <i class="fa-solid fa-arrows-rotate"></i> Refresh GPS
-                    </button>
-                </div>
-
-                <!-- Info Jarak & Radius -->
-                <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2.5">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <span class="text-[10px] text-slate-400 font-medium block">Kantor Presensi</span>
-                            <span class="text-xs font-bold text-slate-800">{{ $currentOffice->name ?? 'Kantor Pusat HadirKU' }}</span>
-                        </div>
-                        <div id="gps-status-badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                            Cek Lokasi...
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
-                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                            <span class="text-[10px] text-slate-400 font-medium block">Jarak ke Kantor</span>
-                            <span id="gps-distance-text" class="text-xs font-extrabold text-slate-800 mt-0.5 block">Menghitung...</span>
-                        </div>
-                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                            <span class="text-[10px] text-slate-400 font-medium block">Batas Radius</span>
-                            <span class="text-xs font-extrabold text-emerald-700 mt-0.5 block">{{ $currentOffice->radius_meters ?? 150 }} meter</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Outside Radius Notice Banner -->
-                <div id="outside-radius-notice" class="hidden mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 leading-snug">
-                    <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>
-                    <span>Posisi di luar radius kantor (maks. {{ $currentOffice->radius_meters ?? 150 }}m). Presensi akan berstatus <strong>PENDING</strong> dan perlu persetujuan Admin.</span>
                 </div>
             </div>
 
@@ -457,15 +414,9 @@
     }
 
     function getCurrentLocation() {
-        const distText = document.getElementById('gps-distance-text');
-        const statusBadge = document.getElementById('gps-status-badge');
-        if (distText) distText.innerText = 'Mencari sinyal GPS...';
-
         if (!navigator.geolocation) {
-            if (distText) distText.innerText = 'GPS tidak didukung browser ini';
-            currentLat = officeLat + 0.00008;
-            currentLng = officeLng + 0.00008;
-            updateLocationView(currentLat, currentLng);
+            currentLat = officeLat;
+            currentLng = officeLng;
             return;
         }
 
@@ -473,39 +424,14 @@
             (pos) => {
                 currentLat = pos.coords.latitude;
                 currentLng = pos.coords.longitude;
-                updateLocationView(currentLat, currentLng);
             },
             (err) => {
                 console.warn('GPS signal issue or denied:', err.message);
-                currentLat = officeLat + 0.00008;
-                currentLng = officeLng + 0.00008;
-                updateLocationView(currentLat, currentLng);
+                currentLat = officeLat;
+                currentLng = officeLng;
             },
-            { enableHighAccuracy: true, timeout: 8000 }
+            { enableHighAccuracy: true, timeout: 6000 }
         );
-    }
-
-    function updateLocationView(lat, lng) {
-        const distance = calculateHaversine(lat, lng, officeLat, officeLng);
-        const distText = document.getElementById('gps-distance-text');
-        const statusBadge = document.getElementById('gps-status-badge');
-        const outsideNotice = document.getElementById('outside-radius-notice');
-
-        if (distText) {
-            distText.innerText = distance + ' meter dari kantor';
-        }
-
-        if (statusBadge) {
-            if (distance <= officeRadius) {
-                statusBadge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800';
-                statusBadge.innerText = '✓ Di Dalam Radius';
-                if (outsideNotice) outsideNotice.classList.add('hidden');
-            } else {
-                statusBadge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300';
-                statusBadge.innerText = '⚠️ Di Luar Radius (' + distance + 'm)';
-                if (outsideNotice) outsideNotice.classList.remove('hidden');
-            }
-        }
     }
 
     function calculateHaversine(lat1, lon1, lat2, lon2) {
@@ -531,47 +457,14 @@
         }
 
         if (currentLat === null || currentLng === null) {
-            currentLat = officeLat + 0.00008;
-            currentLng = officeLng + 0.00008;
+            currentLat = officeLat;
+            currentLng = officeLng;
         }
 
-        const distance = calculateHaversine(currentLat, currentLng, officeLat, officeLng);
-        const actionLabel = punchType === 'check_in' ? 'Check In' : 'Check Out';
-
-        // Peringatan jika presensi berada di luar radius kantor
-        if (distance > officeRadius) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Peringatan: Di Luar Radius!',
-                html: `
-                    <div class="text-left text-xs space-y-2.5 text-slate-700">
-                        <p>Lokasi Anda terdeteksi berjarak <strong>${distance} meter</strong> dari kantor (Batas radius: <strong>${officeRadius} meter</strong>).</p>
-                        <div class="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-950 font-medium leading-relaxed">
-                            <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>
-                            Presensi <strong>${actionLabel}</strong> ini akan disimpan dengan status <strong>PENDING</strong> dan memerlukan persetujuan dari Admin.
-                        </div>
-                        <p class="font-bold text-slate-800">Apakah Anda yakin ingin tetap melanjutkan presensi?</p>
-                    </div>
-                `,
-                showCancelButton: true,
-                confirmButtonColor: '#D97706',
-                cancelButtonColor: '#64748B',
-                confirmButtonText: '<i class="fa-solid fa-paper-plane mr-1.5"></i> Ya, Tetap Lanjutkan',
-                cancelButtonText: 'Batal',
-                reverseButtons: true,
-                focusCancel: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    performPunchSubmission(true);
-                }
-            });
-            return;
-        }
-
-        performPunchSubmission(false);
+        performPunchSubmission();
     }
 
-    async function performPunchSubmission(isOutsideRadius) {
+    async function performPunchSubmission() {
         if (!capturedPhotoData) {
             triggerAutoSnapshot();
         }
