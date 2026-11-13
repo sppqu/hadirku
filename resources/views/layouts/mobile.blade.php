@@ -116,13 +116,13 @@
             <!-- Dashboard -->
             <a href="{{ route('user.dashboard') }}" class="flex flex-col items-center justify-center flex-1 py-1 transition {{ request()->routeIs('user.dashboard') ? 'text-app-green font-bold' : 'text-slate-400 hover:text-slate-600' }}">
                 <i class="fa-solid fa-house text-lg mb-1"></i>
-                <span class="text-[11px]">Dashboard</span>
+                <span class="text-[11px]">Beranda</span>
             </a>
 
             <!-- History -->
             <a href="{{ route('user.history') }}" class="flex flex-col items-center justify-center flex-1 py-1 transition {{ request()->routeIs('user.history') ? 'text-app-green font-bold' : 'text-slate-400 hover:text-slate-600' }}">
                 <i class="fa-regular fa-clock text-lg mb-1"></i>
-                <span class="text-[11px]">History</span>
+                <span class="text-[11px]">Riwayat</span>
             </a>
 
             <!-- Floating Center Punch Button -->
@@ -130,19 +130,19 @@
                 <button type="button" onclick="openPunchModal()" class="w-14 h-14 rounded-full bg-app-green hover:bg-app-darkgreen text-white flex items-center justify-center punch-btn-shadow transition-transform active:scale-95 border-4 border-white">
                     <i class="fa-solid fa-fingerprint text-2xl"></i>
                 </button>
-                <span class="text-[11px] font-semibold text-app-green mt-1">Punch</span>
+                <span class="text-[11px] font-semibold text-app-green mt-1">Presensi</span>
             </div>
 
             <!-- Reports / Leaves -->
             <a href="{{ route('user.leaves') }}" class="flex flex-col items-center justify-center flex-1 py-1 transition {{ request()->routeIs('user.leaves') ? 'text-app-green font-bold' : 'text-slate-400 hover:text-slate-600' }}">
                 <i class="fa-solid fa-chart-simple text-lg mb-1"></i>
-                <span class="text-[11px]">Reports</span>
+                <span class="text-[11px]">Izin & Cuti</span>
             </a>
 
             <!-- Profile -->
             <a href="{{ route('user.profile') }}" class="flex flex-col items-center justify-center flex-1 py-1 transition {{ request()->routeIs('user.profile') ? 'text-app-green font-bold' : 'text-slate-400 hover:text-slate-600' }}">
                 <i class="fa-regular fa-user text-lg mb-1"></i>
-                <span class="text-[11px]">Profile</span>
+                <span class="text-[11px]">Profil</span>
             </a>
         </nav>
     </div>

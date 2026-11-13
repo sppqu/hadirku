@@ -25,12 +25,14 @@ class DashboardController extends Controller
 
         // Greeting
         $hour = Carbon::now('Asia/Jakarta')->hour;
-        if ($hour < 12) {
-            $greeting = 'Good Morning';
-        } elseif ($hour < 17) {
-            $greeting = 'Good Afternoon';
+        if ($hour < 11) {
+            $greeting = 'Selamat Pagi';
+        } elseif ($hour < 15) {
+            $greeting = 'Selamat Siang';
+        } elseif ($hour < 18) {
+            $greeting = 'Selamat Sore';
         } else {
-            $greeting = 'Good Evening';
+            $greeting = 'Selamat Malam';
         }
 
         // Today's Attendance
@@ -74,6 +76,15 @@ class DashboardController extends Controller
 
         // Attendance Overview (Current Week: Mon - Sat)
         $startOfWeek = $today->copy()->startOfWeek(Carbon::MONDAY);
+        $dayNamesIndo = [
+            'Mon' => 'Sen',
+            'Tue' => 'Sel',
+            'Wed' => 'Rab',
+            'Thu' => 'Kam',
+            'Fri' => 'Jum',
+            'Sat' => 'Sab',
+            'Sun' => 'Min',
+        ];
         $weekDays = [];
         for ($i = 0; $i < 6; $i++) {
             $dayDate = $startOfWeek->copy()->addDays($i);
@@ -82,7 +93,7 @@ class DashboardController extends Controller
                 ->first();
 
             $weekDays[] = [
-                'day_name' => $dayDate->format('D'),
+                'day_name' => $dayNamesIndo[$dayDate->format('D')] ?? $dayDate->format('D'),
                 'day_number' => $dayDate->format('d'),
                 'date_str' => $dayDate->toDateString(),
                 'is_today' => $dayDate->isSameDay($today),

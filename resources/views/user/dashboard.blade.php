@@ -27,7 +27,7 @@
             <h1 class="text-xl font-bold tracking-tight flex items-center gap-1.5">
                 {{ $greeting }}, {{ explode(' ', $user->name)[0] }}! 👋
             </h1>
-            <p class="text-emerald-100 text-xs font-normal">Have a productive day ahead.</p>
+            <p class="text-emerald-100 text-xs font-normal">Semoga hari Anda menyenangkan & produktif.</p>
         </div>
     </div>
 
@@ -59,14 +59,14 @@
         <!-- Card: Today's Status (Matches Screenshot 1) -->
         <div class="bg-white rounded-3xl p-5 shadow-[0_10px_25px_-5px_rgba(0,0,0,0.06),0_8px_10px_-6px_rgba(0,0,0,0.04)] border border-slate-100">
             <div class="mb-3">
-                <h3 class="text-xs font-bold text-slate-800">Today's Status</h3>
+                <h3 class="text-xs font-bold text-slate-800">Status Hari Ini</h3>
                 <p class="text-[11px] text-slate-400 font-medium">{{ $today->translatedFormat('d F Y, l') }}</p>
             </div>
 
             <div class="flex items-center justify-between pt-1">
                 <!-- Check In Column -->
                 <div class="flex-1 text-center">
-                    <span class="text-[11px] font-medium text-slate-400 block mb-1">Check In</span>
+                    <span class="text-[11px] font-medium text-slate-400 block mb-1">Presensi Masuk</span>
                     <span class="text-sm font-extrabold text-app-green block tracking-tight">
                         {{ $punchInTime }}
                     </span>
@@ -98,15 +98,15 @@
 
                     <!-- Text Inside Circle -->
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                        <span class="text-[9px] text-slate-400 font-medium leading-none">Working Hours</span>
+                        <span class="text-[9px] text-slate-400 font-medium leading-none">Jam Kerja</span>
                         <span class="text-lg font-black text-slate-800 leading-tight mt-0.5">{{ $workingHoursFormatted }}</span>
-                        <span class="text-[9px] text-slate-400 font-semibold leading-none">Hrs</span>
+                        <span class="text-[9px] text-slate-400 font-semibold leading-none">Jam</span>
                     </div>
                 </div>
 
                 <!-- Check Out Column -->
                 <div class="flex-1 text-center">
-                    <span class="text-[11px] font-medium text-slate-400 block mb-1">Check Out</span>
+                    <span class="text-[11px] font-medium text-slate-400 block mb-1">Presensi Pulang</span>
                     <span class="text-sm font-extrabold text-slate-400 block tracking-tight">
                         {{ $punchOutTime }}
                     </span>
@@ -132,8 +132,8 @@
         <!-- Attendance Overview (Weekly Bar) -->
         <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
             <div class="flex items-center justify-between mb-3">
-                <h3 class="text-xs font-bold text-slate-800">Attendance Overview</h3>
-                <a href="{{ route('user.history') }}" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700">View Calendar</a>
+                <h3 class="text-xs font-bold text-slate-800">Ringkasan Pekan Ini</h3>
+                <a href="{{ route('user.history') }}" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700">Lihat Kalender</a>
             </div>
 
             <div class="grid grid-cols-6 gap-1 text-center">
@@ -157,7 +157,7 @@
                         </div>
 
                         <span class="text-[9px] font-semibold {{ $day['is_today'] ? 'text-emerald-700' : 'text-slate-500' }}">
-                            {{ $day['is_today'] ? 'Today' : $day['check_in_time'] }}
+                            {{ $day['is_today'] ? 'Hari Ini' : $day['check_in_time'] }}
                         </span>
                     </div>
                 @endforeach
@@ -166,27 +166,27 @@
 
         <!-- This Month Summary -->
         <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
-            <h3 class="text-xs font-bold text-slate-800 mb-3">This Month Summary</h3>
+            <h3 class="text-xs font-bold text-slate-800 mb-3">Ringkasan Bulan Ini</h3>
             <div class="grid grid-cols-4 gap-2 text-center">
                 <!-- Present -->
                 <div class="p-2">
                     <span class="text-lg font-black text-emerald-600 block leading-tight">{{ $presentCount }}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Present</span>
+                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Hadir</span>
                 </div>
                 <!-- Absent -->
                 <div class="p-2">
                     <span class="text-lg font-black text-red-500 block leading-tight">{{ $absentCount }}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Absent</span>
+                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Tidak Hadir</span>
                 </div>
                 <!-- Half Day / Late -->
                 <div class="p-2">
                     <span class="text-lg font-black text-amber-500 block leading-tight">{{ $lateCount }}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Half Day</span>
+                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Terlambat</span>
                 </div>
                 <!-- Total Hours -->
                 <div class="p-2">
                     <span class="text-lg font-black text-blue-600 block leading-tight">{{ $totalMonthHoursFormatted }}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Total Hours</span>
+                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Total Jam</span>
                 </div>
             </div>
         </div>
@@ -194,8 +194,8 @@
         <!-- Recent Activities (Timeline List) -->
         <div class="bg-white rounded-3xl p-4 border border-slate-100 shadow-sm">
             <div class="flex items-center justify-between mb-3">
-                <h3 class="text-xs font-bold text-slate-800">Recent Activities</h3>
-                <a href="{{ route('user.history') }}" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700">View All</a>
+                <h3 class="text-xs font-bold text-slate-800">Aktivitas Terkini</h3>
+                <a href="{{ route('user.history') }}" class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700">Lihat Semua</a>
             </div>
 
             <div class="space-y-3">
@@ -228,12 +228,12 @@
                         <!-- Location Pin Badge -->
                         <div class="flex items-center text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
                             <i class="fa-solid fa-location-dot text-[9px] mr-1"></i>
-                            <span>{{ $act->location_name ?? 'Office' }}</span>
+                            <span>{{ $act->location_name ?? 'Kantor' }}</span>
                         </div>
                     </div>
                 @empty
                     <div class="py-6 text-center text-slate-400 text-xs">
-                        Belum ada aktivitas presensi hari ini. Silakan klik tombol <strong>Punch</strong> di bawah.
+                        Belum ada aktivitas presensi hari ini. Silakan klik tombol <strong>Presensi</strong> di bawah.
                     </div>
                 @endforelse
             </div>

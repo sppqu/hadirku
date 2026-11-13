@@ -51,10 +51,10 @@ class AttendanceLog extends Model
     public function getTypeLabelAttribute(): string
     {
         return match ($this->type) {
-            'check_in' => 'Check In',
-            'break_start' => 'Break Start',
-            'break_end' => 'Break End',
-            'check_out' => 'Check Out',
+            'check_in' => 'Presensi Masuk',
+            'break_start' => 'Mulai Istirahat',
+            'break_end' => 'Selesai Istirahat',
+            'check_out' => 'Presensi Pulang',
             default => ucfirst(str_replace('_', ' ', $this->type)),
         };
     }

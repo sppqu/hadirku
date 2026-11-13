@@ -9,7 +9,7 @@
                 <i class="fa-solid fa-arrow-left text-lg"></i>
             </a>
 
-            <h1 class="text-base font-bold tracking-tight">Attendance History</h1>
+            <h1 class="text-base font-bold tracking-tight">Riwayat Kehadiran</h1>
 
             <button type="button" onclick="showFilterDialog()" class="text-white hover:text-emerald-100 p-1.5 rounded-lg active:scale-95 transition">
                 <i class="fa-solid fa-arrow-up-wide-short text-lg"></i>
@@ -39,7 +39,7 @@
 
             <!-- Days of Week Header -->
             <div class="grid grid-cols-7 gap-1 text-center mb-2">
-                @foreach(['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'] as $dayName)
+                @foreach(['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'] as $dayName)
                     <span class="text-[10px] font-semibold text-slate-400 tracking-wider">{{ $dayName }}</span>
                 @endforeach
             </div>
@@ -86,19 +86,19 @@
             <div class="grid grid-cols-4 gap-2 text-center">
                 <div class="p-1">
                     <span class="text-lg font-black text-emerald-600 block leading-tight">{{ $presentCount }}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Present</span>
+                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Hadir</span>
                 </div>
                 <div class="p-1">
                     <span class="text-lg font-black text-red-500 block leading-tight">2</span>
-                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Absent</span>
+                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Tidak Hadir</span>
                 </div>
                 <div class="p-1">
                     <span class="text-lg font-black text-amber-500 block leading-tight">{{ $lateCount ?: 1 }}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Half Day</span>
+                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Terlambat</span>
                 </div>
                 <div class="p-1">
                     <span class="text-lg font-black text-blue-600 block leading-tight">{{ $totalHours }}</span>
-                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Total Hours</span>
+                    <span class="text-[10px] font-semibold text-slate-400 block mt-0.5">Total Jam</span>
                 </div>
             </div>
         </div>
@@ -109,7 +109,7 @@
             <div class="flex items-center justify-between pb-3 border-b border-slate-100">
                 <h3 class="text-xs font-bold text-slate-800">{{ $selectedCarbon->translatedFormat('l, d F Y') }}</h3>
                 <span class="text-xs font-bold text-app-green">
-                    Total Hours: {{ $selectedAttendance ? $selectedAttendance->formatted_working_hours : '00:00' }}
+                    Total Jam Kerja: {{ $selectedAttendance ? $selectedAttendance->formatted_working_hours : '00:00' }}
                 </span>
             </div>
 
@@ -124,12 +124,12 @@
                             <i class="fa-solid fa-arrow-right-to-bracket"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs font-bold text-slate-800">Check In</h4>
+                            <h4 class="text-xs font-bold text-slate-800">Presensi Masuk</h4>
                             <div class="flex items-center space-x-2 text-[11px] text-slate-500">
-                                <span class="font-semibold">{{ $selectedAttendance && $selectedAttendance->check_in ? date('h:i A', strtotime($selectedAttendance->check_in)) : '--:-- --' }}</span>
+                                <span class="font-semibold">{{ $selectedAttendance && $selectedAttendance->check_in ? date('H:i', strtotime($selectedAttendance->check_in)) : '--:--' }}</span>
                                 <span class="text-slate-300">&bull;</span>
                                 <span class="text-slate-400 flex items-center gap-0.5">
-                                    <i class="fa-solid fa-location-dot text-emerald-500 text-[10px]"></i> Office
+                                    <i class="fa-solid fa-location-dot text-emerald-500 text-[10px]"></i> Kantor
                                 </span>
                             </div>
                         </div>
@@ -137,10 +137,10 @@
                     <div>
                         @if($selectedAttendance && $selectedAttendance->check_in)
                             <span class="text-[11px] font-bold {{ $selectedAttendance->check_in_status === 'late' ? 'text-amber-500' : 'text-emerald-600' }}">
-                                {{ $selectedAttendance->check_in_status === 'late' ? 'Late' : 'On time' }}
+                                {{ $selectedAttendance->check_in_status === 'late' ? 'Terlambat' : 'Tepat Waktu' }}
                             </span>
                         @else
-                            <span class="text-[11px] font-semibold text-slate-400">Not recorded</span>
+                            <span class="text-[11px] font-semibold text-slate-400">Belum tercatat</span>
                         @endif
                     </div>
                 </div>
@@ -153,21 +153,21 @@
                             <i class="fa-solid fa-arrow-right-from-bracket"></i>
                         </div>
                         <div>
-                            <h4 class="text-xs font-bold text-slate-800">Check Out</h4>
+                            <h4 class="text-xs font-bold text-slate-800">Presensi Pulang</h4>
                             <div class="flex items-center space-x-2 text-[11px] text-slate-500">
-                                <span class="font-semibold">{{ $selectedAttendance && $selectedAttendance->check_out ? date('h:i A', strtotime($selectedAttendance->check_out)) : '--:-- --' }}</span>
+                                <span class="font-semibold">{{ $selectedAttendance && $selectedAttendance->check_out ? date('H:i', strtotime($selectedAttendance->check_out)) : '--:--' }}</span>
                                 <span class="text-slate-300">&bull;</span>
                                 <span class="text-slate-400 flex items-center gap-0.5">
-                                    <i class="fa-solid fa-location-dot text-emerald-500 text-[10px]"></i> Office
+                                    <i class="fa-solid fa-location-dot text-emerald-500 text-[10px]"></i> Kantor
                                 </span>
                             </div>
                         </div>
                     </div>
                     <div>
                         @if($selectedAttendance && $selectedAttendance->check_out)
-                            <span class="text-[11px] font-bold text-emerald-600">Completed</span>
+                            <span class="text-[11px] font-bold text-emerald-600">Selesai</span>
                         @else
-                            <span class="text-[11px] font-bold text-amber-500">Pending</span>
+                            <span class="text-[11px] font-bold text-amber-500">Menunggu</span>
                         @endif
                     </div>
                 </div>
@@ -176,7 +176,7 @@
 
             <!-- Footer Company Time Zone note -->
             <p class="text-[10px] text-slate-400 italic pt-2">
-                * Times shown are as per your company's time zone (Asia/Jakarta WIB).
+                * Waktu yang ditampilkan mengacu pada zona waktu perusahaan (Asia/Jakarta WIB).
             </p>
         </div>
 
