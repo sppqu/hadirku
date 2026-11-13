@@ -14,6 +14,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Storage;
 
 class CampusProfile extends Page implements HasForms
 {
@@ -38,8 +39,14 @@ class CampusProfile extends Page implements HasForms
     public function mount(): void
     {
         $profile = CampusProfileModel::current();
+        $data = $profile->toArray();
 
-        $this->form->fill($profile->toArray());
+        // Cegah spinner macet jika path logo di database tidak ada di storage fisik
+        if (!empty($data['logo']) && !Storage::disk('public')->exists($data['logo'])) {
+            $data['logo'] = null;
+        }
+
+        $this->form->fill($data);
     }
 
     public function form(Form $form): Form
@@ -58,9 +65,10 @@ class CampusProfile extends Page implements HasForms
                                     ->visibility('public')
                                     ->directory('campus')
                                     ->image()
-                                    ->avatar()
-                                    ->imageEditor()
-                                    ->helperText('Format: PNG, JPG, WebP. Maks 2MB.')
+                                    ->imagePreviewHeight('150')
+                                    ->maxSize(2048)
+                                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'])
+                                    ->helperText('Format: PNG, JPG, WebP, SVG. Maks 2MB.')
                                     ->columnSpan(1),
 
                                 Grid::make(2)

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class CampusProfile extends Model
 {
@@ -56,7 +57,7 @@ class CampusProfile extends Model
 
     public function getLogoUrlAttribute(): string
     {
-        if ($this->logo) {
+        if ($this->logo && Storage::disk('public')->exists($this->logo)) {
             return asset('storage/' . $this->logo);
         }
         if (file_exists(public_path('images/logo.png'))) {

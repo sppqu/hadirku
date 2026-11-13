@@ -70,8 +70,7 @@ class AdminProfile extends Page implements HasForms
                             ->visibility('public')
                             ->directory('avatars')
                             ->image()
-                            ->avatar()
-                            ->imageEditor(),
+                            ->avatar(),
                         Grid::make(2)
                             ->schema([
                                 TextInput::make('name')
