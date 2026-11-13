@@ -41,10 +41,8 @@ class CampusProfile extends Page implements HasForms
         $profile = CampusProfileModel::current();
         $data = $profile->toArray();
 
-        // Cegah spinner macet jika path logo di database tidak ada di storage fisik
-        if (!empty($data['logo']) && !Storage::disk('public')->exists($data['logo'])) {
-            $data['logo'] = null;
-        }
+        // Jangan isi state logo agar FilePond tidak me-load file lama/preview yang menyebabkan spinner macet
+        unset($data['logo']);
 
         $this->form->fill($data);
     }
@@ -60,15 +58,14 @@ class CampusProfile extends Page implements HasForms
                         Grid::make(3)
                             ->schema([
                                 FileUpload::make('logo')
-                                    ->label('Logo Kampus')
+                                    ->label('Ganti Logo Kampus')
                                     ->disk('public')
                                     ->visibility('public')
                                     ->directory('campus')
-                                    ->image()
-                                    ->imagePreviewHeight('150')
-                                    ->maxSize(2048)
                                     ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'])
-                                    ->helperText('Format: PNG, JPG, WebP, SVG. Maks 2MB.')
+                                    ->maxSize(2048)
+                                    ->formatStateUsing(fn () => null)
+                                    ->helperText('Pilih berkas baru (PNG, JPG, WebP, SVG, maks 2MB) jika ingin mengganti logo. Logo aktif sudah tampil di banner atas.')
                                     ->columnSpan(1),
 
                                 Grid::make(2)
@@ -194,8 +191,16 @@ class CampusProfile extends Page implements HasForms
     public function save(): void
     {
         $data = $this->form->getState();
-
         $profile = CampusProfileModel::current();
+
+        // Jika user memilih file logo baru, simpan ke database
+        if (!empty($data['logo'])) {
+            $profile->logo = $data['logo'];
+            $profile->save();
+        }
+        // Hapus key logo agar tidak menimpa logo yang sudah ada jika tidak ada berkas baru yang diupload
+        unset($data['logo']);
+
         $profile->update($data);
 
         Notification::make()

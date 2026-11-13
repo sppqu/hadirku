@@ -78,4 +78,11 @@
             </div>
         </form>
     </div>
+
+    <style>
+        .filepond--image-preview-wrapper,
+        .filepond--image-preview {
+            display: none !important;
+        }
+    </style>
 </x-filament-panels::page>
