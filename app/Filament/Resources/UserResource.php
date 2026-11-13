@@ -259,20 +259,45 @@ class UserResource extends Resource
 
                                 Forms\Components\Section::make('Foto Profil & Status Akun')
                                     ->schema([
-                                        Forms\Components\Grid::make(2)
+                                        Forms\Components\Grid::make(3)
                                             ->schema([
+                                                Forms\Components\Placeholder::make('current_avatar')
+                                                    ->label('Foto Profil Saat Ini')
+                                                    ->content(function (?User $record) {
+                                                        if (! $record) {
+                                                            return new HtmlString('<span style="font-size: 12px; color: #94a3b8;">Belum ada foto profil</span>');
+                                                        }
+                                                        $url = $record->avatar_url;
+                                                        return new HtmlString('
+                                                            <div style="display: flex; align-items: center; gap: 12px; padding-top: 4px;">
+                                                                <img src="' . $url . '" alt="Foto Profil" style="width: 52px; height: 52px; object-fit: cover; border-radius: 50%; border: 2px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.08);" />
+                                                                <div>
+                                                                    <div style="font-size: 12px; font-weight: 600; color: #334155;">' . e($record->name) . '</div>
+                                                                    <div style="font-size: 11px; color: #64748b;">Foto aktif saat ini</div>
+                                                                </div>
+                                                            </div>
+                                                        ');
+                                                    })
+                                                    ->visible(fn (?User $record) => $record !== null)
+                                                    ->columnSpan(1),
+
                                                 Forms\Components\FileUpload::make('avatar')
-                                                    ->label('Foto Profil Pegawai')
+                                                    ->label('Ganti Foto Profil Pegawai')
                                                     ->disk('public')
                                                     ->visibility('public')
-                                                    ->image()
-                                                    ->avatar()
-                                                    ->directory('avatars'),
+                                                    ->directory('avatars')
+                                                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg', 'image/webp'])
+                                                    ->maxSize(2048)
+                                                    ->formatStateUsing(fn () => null)
+                                                    ->dehydrated(fn ($state) => filled($state))
+                                                    ->helperText('Pilih berkas baru jika ingin mengganti foto (PNG/JPG maks 2MB). Tanpa preview.')
+                                                    ->columnSpan(fn (?User $record) => $record !== null ? 1 : 2),
 
                                                 Forms\Components\Toggle::make('is_active')
                                                     ->label('Akun Pegawai Aktif')
                                                     ->helperText('Nonaktifkan jika pegawai sudah tidak bekerja di perusahaan.')
-                                                    ->default(true),
+                                                    ->default(true)
+                                                    ->columnSpan(1),
                                             ]),
                                     ]),
                             ]),
