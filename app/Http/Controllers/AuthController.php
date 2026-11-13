@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -56,6 +57,57 @@ class AuthController extends Controller
         }
 
         return redirect()->intended('/dashboard');
+    }
+
+    public function loginAdmin(Request $request)
+    {
+        $data = $request->input('data', []);
+
+        $login = $request->input('login')
+            ?? (is_array($data) ? ($data['email'] ?? $data['login'] ?? null) : null)
+            ?? $request->input('email');
+
+        $password = $request->input('password')
+            ?? (is_array($data) ? ($data['password'] ?? null) : null);
+
+        $remember = (bool) (
+            $request->input('remember')
+            ?? (is_array($data) ? ($data['remember'] ?? false) : false)
+        );
+
+        if (! $login || ! $password) {
+            return back()->withErrors([
+                'email' => 'Email / NIK dan kata sandi wajib diisi.',
+            ])->withInput();
+        }
+
+        $user = User::where('email', $login)
+            ->orWhere('nik', $login)
+            ->first();
+
+        if (! $user || ! Hash::check($password, $user->password)) {
+            return back()->withErrors([
+                'email' => 'Email / NIK atau kata sandi salah.',
+            ])->withInput();
+        }
+
+        if (! $user->is_active) {
+            return back()->withErrors([
+                'email' => 'Akun Anda dinonaktifkan. Silakan hubungi admin.',
+            ]);
+        }
+
+        $panel = Filament::getCurrentPanel() ?? Filament::getPanel('admin');
+        if (! $user->canAccessPanel($panel)) {
+            return back()->withErrors([
+                'email' => 'Akun Anda tidak memiliki izin akses ke panel admin.',
+            ]);
+        }
+
+        Auth::login($user, $remember);
+        $request->session()->regenerate();
+
+        return redirect()->intended('/admin');
     }
 
     public function logout(Request $request)
