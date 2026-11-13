@@ -88,9 +88,9 @@
                                 type="text" 
                                 name="login" 
                                 id="login" 
-                                value="{{ old('login', 'john@hadirku.com') }}"
+                                value="{{ old('login') }}"
                                 required 
-                                placeholder="john@hadirku.com atau HK-2024001"
+                                placeholder="Email atau NIK"
                                 class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                             >
                         </div>
@@ -106,7 +106,6 @@
                                 type="password" 
                                 name="password" 
                                 id="password" 
-                                value="password"
                                 required 
                                 placeholder="••••••••"
                                 class="w-full pl-10 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
@@ -133,33 +132,12 @@
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </form>
-
-                <!-- Quick Demo Login Switcher -->
-                <div class="mt-6 pt-4 border-t border-slate-100">
-                    <p class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider text-center mb-2">Akun Demo Pengujian</p>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <button type="button" onclick="fillPegawai()" class="p-2 bg-slate-50 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 rounded-lg font-medium border border-slate-200 text-left transition">
-                            <div class="font-bold text-[11px]">👤 John Doe (Pegawai)</div>
-                            <div class="text-[10px] text-slate-400">Pass: password</div>
-                        </button>
-                        <button type="button" onclick="fillSiti()" class="p-2 bg-slate-50 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 rounded-lg font-medium border border-slate-200 text-left transition">
-                            <div class="font-bold text-[11px]">👤 Siti Nurhaliza</div>
-                            <div class="text-[10px] text-slate-400">Pass: password</div>
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Footer: Switch to Admin Login -->
-        <div class="px-8 py-6 text-center">
-            <p class="text-xs text-slate-500">
-                Anda seorang Administrator?
-            </p>
-            <a href="/admin/login" class="inline-flex items-center space-x-1.5 mt-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-4 py-2 rounded-xl transition border border-emerald-100">
-                <i class="fa-solid fa-shield-halved"></i>
-                <span>Masuk ke Panel Admin (Web)</span>
-            </a>
+        <!-- Footer -->
+        <div class="px-8 py-6 text-center text-xs text-slate-400">
+            &copy; {{ date('Y') }} HadirKU. All rights reserved.
         </div>
     </div>
 
@@ -176,16 +154,6 @@
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
             }
-        }
-
-        function fillPegawai() {
-            document.getElementById('login').value = 'john@hadirku.com';
-            document.getElementById('password').value = 'password';
-        }
-
-        function fillSiti() {
-            document.getElementById('login').value = 'siti@hadirku.com';
-            document.getElementById('password').value = 'password';
         }
     </script>
 </body>
