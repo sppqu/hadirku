@@ -258,7 +258,7 @@
                     </div>
                     <div class="p-2.5 bg-purple-50 rounded-lg border border-purple-100">
                         <strong class="text-purple-800 block">Verifikasi Wajah Siap</strong>
-                        <span class="text-slate-600">Arahkan kamera ke wajah saat menekan tombol Punch.</span>
+                        <span class="text-slate-600">Arahkan kamera ke wajah saat melakukan Presensi.</span>
                     </div>
                 </div>
             `,

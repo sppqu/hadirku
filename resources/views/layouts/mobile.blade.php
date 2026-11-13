@@ -123,10 +123,10 @@
 
             <!-- Floating Center Punch Button -->
             <div class="flex flex-col items-center justify-center flex-1 -mt-7">
-                <button type="button" onclick="openPunchModal()" class="w-14 h-14 rounded-full bg-app-green hover:bg-app-darkgreen text-white flex items-center justify-center punch-btn-shadow transition-transform active:scale-95 border-4 border-white">
+                <a href="{{ route('user.punch') }}" class="w-14 h-14 rounded-full {{ request()->routeIs('user.punch*') ? 'bg-emerald-700 ring-4 ring-emerald-300' : 'bg-app-green hover:bg-app-darkgreen' }} text-white flex items-center justify-center punch-btn-shadow transition-transform active:scale-95 border-4 border-white">
                     <i class="fa-solid fa-fingerprint text-2xl"></i>
-                </button>
-                <span class="text-[11px] font-semibold text-app-green mt-1">Presensi</span>
+                </a>
+                <span class="text-[11px] font-semibold {{ request()->routeIs('user.punch*') ? 'text-emerald-700 font-bold' : 'text-app-green' }} mt-1">Presensi</span>
             </div>
 
             <!-- Reports / Leaves -->
@@ -142,9 +142,6 @@
             </a>
         </nav>
     </div>
-
-    <!-- Punch Modal (Camera Selfie Face Verification + GPS Geofencing Map) -->
-    @include('components.punch-modal')
 
     <!-- Flash message alerts -->
     @if(session('success'))

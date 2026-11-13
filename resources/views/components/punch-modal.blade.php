@@ -100,6 +100,19 @@
                 </div>
             </div>
 
+            <!-- Fake GPS Warning Alert Banner -->
+            <div id="fake-gps-warning" class="hidden p-3.5 bg-red-50 border border-red-200 rounded-2xl flex items-start gap-3 shadow-xs">
+                <div class="w-8 h-8 rounded-xl bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 text-sm">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="text-xs">
+                    <div class="font-bold text-red-900">Peringatan: Lokasi Tiruan (Fake GPS) Terdeteksi!</div>
+                    <p class="text-[11px] text-red-700 mt-0.5 leading-relaxed">
+                        Sistem mendeteksi indikasi aplikasi Fake GPS aktif. Mohon matikan aplikasi Fake GPS dan nonaktifkan opsi Lokasi Tiruan di perangkat Anda.
+                    </p>
+                </div>
+            </div>
+
             <!-- Optional Notes -->
             <div>
                 <label for="punch-notes" class="block text-xs font-bold text-slate-600 mb-1">Catatan Tambahan (Opsional)</label>
@@ -140,6 +153,8 @@
     let capturedPhotoData = null;
     let currentLat = null;
     let currentLng = null;
+    let isFakeGpsDetected = false;
+    let fakeGpsReason = '';
 
     // Face detection & auto-snap state
     let trackerTask = null;
@@ -424,6 +439,7 @@
             (pos) => {
                 currentLat = pos.coords.latitude;
                 currentLng = pos.coords.longitude;
+                checkFakeGpsAnomaly(pos);
             },
             (err) => {
                 console.warn('GPS signal issue or denied:', err.message);
@@ -432,6 +448,51 @@
             },
             { enableHighAccuracy: true, timeout: 6000 }
         );
+    }
+
+    function checkFakeGpsAnomaly(pos) {
+        isFakeGpsDetected = false;
+        fakeGpsReason = '';
+        const coords = pos.coords;
+
+        // Indikator 1: Akurasi terlalu presisi / anomali mock provider
+        // Satelit GPS smartphone normal memiliki akurasi 5m - 40m.
+        // Fake GPS / mock provider di Android sering menginjeksi akurasi 0, negatif, atau < 1.0 m.
+        if (coords.accuracy !== null && coords.accuracy !== undefined) {
+            if (coords.accuracy <= 0 || coords.accuracy < 1.0) {
+                isFakeGpsDetected = true;
+                fakeGpsReason = 'Akurasi sinyal mencurigakan (< 1 meter)';
+            }
+        }
+
+        // Indikator 2: Anomali timestamp posisi vs jam sistem (replay packet injection)
+        if (pos.timestamp) {
+            const timeDiff = Math.abs(Date.now() - pos.timestamp);
+            if (timeDiff > 120000) {
+                isFakeGpsDetected = true;
+                fakeGpsReason = 'Timestamp sinyal GPS tidak sinkron dengan waktu nyata';
+            }
+        }
+
+        // Indikator 3: Koordinat emulator browser DevTools (preset Mountain View)
+        if (Math.abs(coords.latitude - 37.422) < 0.005 && Math.abs(coords.longitude - (-122.084)) < 0.005) {
+            isFakeGpsDetected = true;
+            fakeGpsReason = 'Sensor emulator browser terdeteksi';
+        }
+
+        const warnEl = document.getElementById('fake-gps-warning');
+        const submitBtn = document.getElementById('btn-submit-punch');
+        if (isFakeGpsDetected) {
+            if (warnEl) warnEl.classList.remove('hidden');
+            if (submitBtn) {
+                submitBtn.classList.add('opacity-50');
+            }
+        } else {
+            if (warnEl) warnEl.classList.add('hidden');
+            if (submitBtn) {
+                submitBtn.classList.remove('opacity-50');
+            }
+        }
     }
 
     function calculateHaversine(lat1, lon1, lat2, lon2) {
@@ -452,6 +513,26 @@
                 title: 'Presensi Selesai',
                 text: 'Anda telah menyelesaikan seluruh presensi hari ini.',
                 confirmButtonColor: '#059669',
+            });
+            return;
+        }
+
+        // Blokir jika terdeteksi Fake GPS
+        if (isFakeGpsDetected) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Presensi Ditolak: Fake GPS!',
+                html: `
+                    <div class="text-left text-xs space-y-2 text-slate-700">
+                        <p class="font-bold text-red-600">Sistem mendeteksi manipulasi sinyal GPS (Mock Location).</p>
+                        <p>Keterangan: <span class="font-semibold text-slate-800">${fakeGpsReason || 'Aplikasi Fake GPS aktif'}</span>.</p>
+                        <div class="p-2.5 bg-red-50 border border-red-200 rounded-xl text-red-800 text-[11px] leading-relaxed">
+                            Mohon matikan aplikasi Fake GPS dan nonaktifkan opsi <strong>"Pilih aplikasi lokasi tiruan (Mock location)"</strong> di Pengaturan Opsi Pengembang (Developer Options) HP Anda, lalu coba lagi.
+                        </div>
+                    </div>
+                `,
+                confirmButtonColor: '#EF4444',
+                confirmButtonText: 'Saya Mengerti'
             });
             return;
         }

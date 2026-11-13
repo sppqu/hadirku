@@ -23,7 +23,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
     Route::get('/history', [DashboardController::class, 'history'])->name('user.history');
-    Route::post('/punch', [DashboardController::class, 'punch'])->name('user.punch');
+    Route::get('/punch', [DashboardController::class, 'punchPage'])->name('user.punch');
+    Route::post('/punch', [DashboardController::class, 'punch'])->name('user.punch.store');
     Route::get('/leaves', [DashboardController::class, 'leaves'])->name('user.leaves');
     Route::post('/leaves', [DashboardController::class, 'storeLeave'])->name('user.leaves.store');
     Route::get('/profile', [DashboardController::class, 'profile'])->name('user.profile');

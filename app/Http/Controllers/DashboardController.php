@@ -253,6 +253,69 @@ class DashboardController extends Controller
     }
 
     /**
+     * User Mobile Punch Page (Standalone View)
+     */
+    public function punchPage()
+    {
+        $user = Auth::user()->load(['office', 'shift', 'department']);
+        $office = $user->office ?: Office::where('is_active', true)->first();
+        $today = Carbon::today('Asia/Jakarta');
+
+        $todayAttendance = Attendance::where('user_id', $user->id)
+            ->whereDate('date', $today->toDateString())
+            ->first();
+
+        $hasCheckIn = $todayAttendance && ! empty($todayAttendance->check_in);
+        $hasCheckOut = $todayAttendance && ! empty($todayAttendance->check_out);
+
+        if (! $hasCheckIn) {
+            $punchType = 'check_in';
+            $pageTitle = 'Presensi Masuk';
+            $actionBtnText = 'Presensi Masuk Sekarang';
+            $actionBtnClass = 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/30';
+            $actionIcon = 'fa-solid fa-arrow-right-to-bracket';
+            $statusSubtext = 'Posisikan wajah Anda pada lingkaran oval kamera untuk verifikasi.';
+        } elseif (! $hasCheckOut) {
+            $punchType = 'check_out';
+            $pageTitle = 'Presensi Pulang';
+            $actionBtnText = 'Presensi Pulang Sekarang';
+            $actionBtnClass = 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/30';
+            $actionIcon = 'fa-solid fa-arrow-right-from-bracket';
+            $checkInTimeDisp = date('H:i', strtotime($todayAttendance->check_in));
+            $statusSubtext = "Sudah presensi masuk pukul {$checkInTimeDisp} WIB. Lakukan verifikasi wajah untuk presensi pulang.";
+        } else {
+            $punchType = 'completed';
+            $pageTitle = 'Presensi Hari Ini Selesai';
+            $actionBtnText = 'Presensi Hari Ini Selesai ✓';
+            $actionBtnClass = 'bg-slate-400 cursor-not-allowed shadow-none';
+            $actionIcon = 'fa-solid fa-circle-check';
+            $checkInTimeDisp = date('H:i', strtotime($todayAttendance->check_in));
+            $checkOutTimeDisp = date('H:i', strtotime($todayAttendance->check_out));
+            $statusSubtext = "Presensi lengkap hari ini (Masuk: {$checkInTimeDisp} WIB &bull; Pulang: {$checkOutTimeDisp} WIB).";
+        }
+
+        $todayHoliday = Holiday::getHolidayForDate($today);
+        $isWorkingDayToday = $user->isWorkingDay($today);
+
+        return view('user.punch', compact(
+            'user',
+            'office',
+            'today',
+            'todayAttendance',
+            'hasCheckIn',
+            'hasCheckOut',
+            'punchType',
+            'pageTitle',
+            'actionBtnText',
+            'actionBtnClass',
+            'actionIcon',
+            'statusSubtext',
+            'todayHoliday',
+            'isWorkingDayToday'
+        ));
+    }
+
+    /**
      * Submit Presensi GPS & Face Verification
      */
     public function punch(Request $request)
