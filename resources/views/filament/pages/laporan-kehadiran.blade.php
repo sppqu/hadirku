@@ -14,13 +14,13 @@
 
                             <x-filament::button 
                                 type="button" 
-                                color="success" 
+                                color="warning" 
                                 icon="heroicon-m-printer" 
                                 onclick="window.print()"
                                 class="btn-print-action cursor-pointer"
-                                style="background-color: #059669 !important; color: #ffffff !important; border: 1px solid #047857 !important;"
+                                style="background-color: #ea580c !important; color: #ffffff !important; border: 1px solid #c2410c !important;"
                             >
-                                Cetak Laporan (Landscape)
+                                Cetak
                             </x-filament::button>
                         </div>
 
@@ -401,13 +401,13 @@
 
     {{-- Comprehensive Styling for Screen Preview & Landscape Official Report Printing --}}
     <style>
-        /* Print Action Button (Ensures high visibility in both light & dark themes) */
+        /* Print Action Button (Orange color, high visibility in both light & dark themes) */
         .btn-print-action,
         button.btn-print-action,
         .btn-print-action.fi-btn {
-            background-color: #059669 !important;
+            background-color: #ea580c !important;
             color: #ffffff !important;
-            border: 1px solid #047857 !important;
+            border: 1px solid #c2410c !important;
             font-weight: 600 !important;
             display: inline-flex !important;
             align-items: center !important;
@@ -416,20 +416,20 @@
         .btn-print-action:hover,
         button.btn-print-action:hover,
         .btn-print-action.fi-btn:hover {
-            background-color: #047857 !important;
+            background-color: #c2410c !important;
             color: #ffffff !important;
         }
         .dark .btn-print-action,
         .dark button.btn-print-action,
         .dark .btn-print-action.fi-btn {
-            background-color: #10b981 !important;
+            background-color: #f97316 !important;
             color: #ffffff !important;
-            border: 1px solid #059669 !important;
+            border: 1px solid #ea580c !important;
         }
         .dark .btn-print-action:hover,
         .dark button.btn-print-action:hover,
         .dark .btn-print-action.fi-btn:hover {
-            background-color: #059669 !important;
+            background-color: #ea580c !important;
         }
 
         /* Screen Metrics Grid */

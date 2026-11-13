@@ -30,33 +30,33 @@ class StatsOverviewWidget extends BaseWidget
             Stat::make('Total Pegawai', $totalEmployees)
                 ->description('Pegawai aktif terdaftar')
                 ->descriptionIcon('heroicon-m-users')
-                ->color('info')
                 ->extraAttributes([
-                    'class' => 'border-2 border-blue-500/30 dark:border-blue-500/30 border-l-4 border-l-blue-500 rounded-xl shadow-sm',
+                    'class' => 'card-stat-pegawai bg-white dark:bg-gray-900 shadow-sm transition hover:shadow-md',
+                    'style' => 'border: 1.5px solid #6366f1 !important; border-radius: 1rem !important;',
                 ]),
 
             Stat::make('Hadir Hari Ini', "{$presentToday} / {$totalEmployees}")
                 ->description("{$attendanceRate}% kehadiran")
                 ->descriptionIcon('heroicon-m-check-badge')
-                ->color('success')
                 ->extraAttributes([
-                    'class' => 'border-2 border-emerald-500/30 dark:border-emerald-500/30 border-l-4 border-l-emerald-500 rounded-xl shadow-sm',
+                    'class' => 'card-stat-hadir bg-white dark:bg-gray-900 shadow-sm transition hover:shadow-md',
+                    'style' => 'border: 1.5px solid #10b981 !important; border-radius: 1rem !important;',
                 ]),
 
             Stat::make('Terlambat Hari Ini', $lateToday)
                 ->description('Melewati jam toleransi')
                 ->descriptionIcon('heroicon-m-clock')
-                ->color($lateToday > 0 ? 'danger' : 'gray')
                 ->extraAttributes([
-                    'class' => 'border-2 border-rose-500/30 dark:border-rose-500/30 border-l-4 border-l-rose-500 rounded-xl shadow-sm',
+                    'class' => 'card-stat-terlambat bg-white dark:bg-gray-900 shadow-sm transition hover:shadow-md',
+                    'style' => 'border: 1.5px solid #f43f5e !important; border-radius: 1rem !important;',
                 ]),
 
             Stat::make('Izin / Cuti Hari Ini', $leavesToday)
                 ->description('Pengajuan disetujui')
                 ->descriptionIcon('heroicon-m-calendar-days')
-                ->color('warning')
                 ->extraAttributes([
-                    'class' => 'border-2 border-amber-500/30 dark:border-amber-500/30 border-l-4 border-l-amber-500 rounded-xl shadow-sm',
+                    'class' => 'card-stat-izin bg-white dark:bg-gray-900 shadow-sm transition hover:shadow-md',
+                    'style' => 'border: 1.5px solid #f59e0b !important; border-radius: 1rem !important;',
                 ]),
         ];
     }

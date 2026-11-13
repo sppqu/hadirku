@@ -43,6 +43,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
                 fn () => view('filament.components.login-footer')
             )
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn () => view('filament.components.dashboard-styles')
+            )
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Profile')
