@@ -65,7 +65,7 @@
         <div class="flex-1 px-8 -mt-6 z-10">
             <div class="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
                 <h2 class="text-xl font-bold text-slate-900 mb-1">Selamat Datang! 👋</h2>
-                <p class="text-xs text-slate-500 mb-6">Silakan masuk menggunakan Email atau NIK pegawai Anda.</p>
+                <p class="text-xs text-slate-500 mb-6">Silakan masuk menggunakan Email atau {{ \App\Models\CampusProfile::getEmployeeIdLabel() }} pegawai Anda.</p>
 
                 @if($errors->any())
                     <div class="mb-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
@@ -79,7 +79,7 @@
                 <form action="{{ route('login.post') }}" method="POST" class="space-y-4">
                     @csrf
                     <div>
-                        <label for="login" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email atau NIK</label>
+                        <label for="login" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Email atau {{ \App\Models\CampusProfile::getEmployeeIdLabel() }}</label>
                         <div class="relative rounded-xl shadow-sm">
                             <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                                 <i class="fa-solid fa-id-card text-sm"></i>
@@ -90,7 +90,7 @@
                                 id="login" 
                                 value="{{ old('login') }}"
                                 required 
-                                placeholder="Email atau NIK"
+                                placeholder="Email atau {{ \App\Models\CampusProfile::getEmployeeIdLabel() }}"
                                 class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition"
                             >
                         </div>

@@ -40,11 +40,11 @@ class UserResource extends Resource
                                 Forms\Components\Grid::make(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('nik')
-                                            ->label('Nomor Induk Karyawan (NIK)')
+                                            ->label(fn () => 'Nomor Identitas (' . \App\Models\CampusProfile::getEmployeeIdLabel() . ')')
                                             ->required()
                                             ->unique(ignoreRecord: true)
                                             ->maxLength(50)
-                                            ->placeholder('HK-2024001'),
+                                            ->placeholder(fn () => 'Contoh: ' . (\App\Models\CampusProfile::getEmployeeIdLabel() === 'NIP' ? '198501012010011001' : 'HK-2024001')),
                                         Forms\Components\TextInput::make('name')
                                             ->label('Nama Lengkap')
                                             ->required()
@@ -314,7 +314,7 @@ class UserResource extends Resource
                     ->label('Foto')
                     ->circular(),
                 Tables\Columns\TextColumn::make('nik')
-                    ->label('NIK')
+                    ->label(fn () => \App\Models\CampusProfile::getEmployeeIdLabel())
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),

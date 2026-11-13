@@ -84,6 +84,26 @@ class CampusProfile extends Page implements HasForms
                                             ->maxLength(255)
                                             ->columnSpanFull(),
 
+                                        TextInput::make('employee_id_label')
+                                            ->label('Penamaan ID Pegawai (Dinamis: NIK / NIP / NIDN / NUPTK dll)')
+                                            ->placeholder('Contoh: NIP, NIK, NIDN, NUPTK, IDK, ID Pegawai')
+                                            ->helperText('Istilah identitas pegawai yang digunakan institusi/kampus. Teks ini akan otomatis dipakai di Data Pegawai, Formulir, dan Cetak Laporan.')
+                                            ->datalist([
+                                                'NIK',
+                                                'NIP',
+                                                'NIDN',
+                                                'NUPTK',
+                                                'NIDK',
+                                                'NPK',
+                                                'IDK',
+                                                'ID Pegawai',
+                                                'NIP / NIDN',
+                                                'NIK / NIP',
+                                            ])
+                                            ->default('NIK')
+                                            ->maxLength(50)
+                                            ->columnSpanFull(),
+
                                         TextInput::make('campus_code')
                                             ->label('Kode PT (PDDikti)')
                                             ->placeholder('Contoh: 041001')

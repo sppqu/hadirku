@@ -13,6 +13,7 @@ class CampusProfile extends Model
     protected $fillable = [
         'name',
         'foundation',
+        'employee_id_label',
         'campus_code',
         'rector_name',
         'accreditation',
@@ -40,6 +41,7 @@ class CampusProfile extends Model
             [
                 'name' => 'Universitas HadirKU',
                 'foundation' => null,
+                'employee_id_label' => 'NIK',
                 'campus_code' => '041001',
                 'rector_name' => 'Prof. Dr. H. Irwan Santoso, M.Kom.',
                 'accreditation' => 'Unggul',
@@ -71,5 +73,21 @@ class CampusProfile extends Model
     public function getYayasanAttribute(): ?string
     {
         return $this->foundation;
+    }
+
+    /**
+     * Dapatkan istilah nomor identitas pegawai yang dikonfigurasi (misal: NIP, NIK, NIDN, NUPTK)
+     */
+    public static function getEmployeeIdLabel(): string
+    {
+        try {
+            $profile = static::first();
+            if ($profile && !empty($profile->employee_id_label)) {
+                return trim($profile->employee_id_label);
+            }
+        } catch (\Throwable $e) {
+            // Fallback jika belum migrasi
+        }
+        return 'NIK';
     }
 }

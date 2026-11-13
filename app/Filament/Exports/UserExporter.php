@@ -14,7 +14,7 @@ class UserExporter extends Exporter
     public static function getColumns(): array
     {
         return [
-            ExportColumn::make('nik')->label('NIK'),
+            ExportColumn::make('nik')->label(\App\Models\CampusProfile::getEmployeeIdLabel()),
             ExportColumn::make('name')->label('Nama Lengkap'),
             ExportColumn::make('email')->label('Email'),
             ExportColumn::make('phone')->label('Nomor HP/WA'),

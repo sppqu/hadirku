@@ -19,7 +19,7 @@ class UserImporter extends Importer
     {
         return [
             ImportColumn::make('nik')
-                ->label('NIK')
+                ->label(\App\Models\CampusProfile::getEmployeeIdLabel())
                 ->requiredMapping()
                 ->rules(['required', 'max:50']),
 

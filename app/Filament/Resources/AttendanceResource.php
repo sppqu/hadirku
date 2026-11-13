@@ -92,7 +92,7 @@ class AttendanceResource extends Resource
                     ->label('Nama Pegawai')
                     ->searchable()
                     ->sortable()
-                    ->description(fn (Attendance $record): string => $record->user->nik ?? '-'),
+                    ->description(fn (Attendance $record): string => $record->user?->nik ? (\App\Models\CampusProfile::getEmployeeIdLabel() . ': ' . $record->user->nik) : '-'),
                 Tables\Columns\TextColumn::make('user.department.name')
                     ->label('Departemen')
                     ->badge()

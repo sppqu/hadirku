@@ -22,7 +22,7 @@
                             </span>
                             @if($user->nik)
                                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 font-mono font-medium text-gray-700 dark:bg-gray-800 dark:text-gray-300">
-                                    NIK: {{ $user->nik }}
+                                    {{ \App\Models\CampusProfile::getEmployeeIdLabel() }}: {{ $user->nik }}
                                 </span>
                             @endif
                         </div>

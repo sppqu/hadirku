@@ -52,6 +52,7 @@
             $campusProvince = $campus?->province ?? 'DKI Jakarta';
             $campusPostalCode = $campus?->postal_code ?? '12190';
             $campusLogo = $campus?->logo_url ?? asset('images/logo.png');
+            $employeeIdLabel = $campus?->employee_id_label ?: 'NIK';
         @endphp
 
         <div class="report-metrics-grid no-print">
@@ -186,7 +187,7 @@
                             <span class="meta-term">Nama Pegawai</span>
                             <span class="meta-colon">:</span>
                             <span class="meta-desc font-bold">
-                                {{ $data['selected_user']->name }} (NIK: {{ $data['selected_user']->nik ?? '-' }})
+                                {{ $data['selected_user']->name }} ({{ $employeeIdLabel }}: {{ $data['selected_user']->nik ?? '-' }})
                             </span>
                         </div>
                         @endif
@@ -274,7 +275,7 @@
                                     <td class="cell-no">{{ $idx + 1 }}</td>
                                     <td class="cell-pegawai">
                                         <div class="emp-name">{{ $emp->name }}</div>
-                                        <div class="emp-info">{{ $emp->nik ?? '-' }} &bull; {{ $emp->department->name ?? '-' }}</div>
+                                        <div class="emp-info">{{ $employeeIdLabel }}: {{ $emp->nik ?? '-' }} &bull; {{ $emp->department->name ?? '-' }}</div>
                                     </td>
                                     @foreach($data['dates'] as $d)
                                         @php $cell = $row['cells'][$d['date_str']] ?? ['type' => 'off', 'label' => '-']; @endphp
@@ -317,7 +318,7 @@
                             <tr>
                                 <th class="col-no">No</th>
                                 <th>Tanggal</th>
-                                <th>NIK / NIP</th>
+                                <th>{{ $employeeIdLabel }}</th>
                                 <th>Nama Pegawai</th>
                                 <th>Departemen</th>
                                 <th class="text-center">Jam Masuk</th>
