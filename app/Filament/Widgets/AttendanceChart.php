@@ -12,6 +12,15 @@ class AttendanceChart extends ChartWidget
 
     protected static ?int $sort = 2;
 
+    protected int | string | array $columnSpan = [
+        'default' => 'full',
+        'md' => 1,
+        'lg' => 1,
+        'xl' => 1,
+    ];
+
+    protected static ?string $maxHeight = '320px';
+
     protected function getData(): array
     {
         $dates = [];

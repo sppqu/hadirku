@@ -14,51 +14,58 @@ class LatestAttendancesWidget extends BaseWidget
 
     protected static ?int $sort = 3;
 
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = [
+        'default' => 'full',
+        'md' => 1,
+        'lg' => 1,
+        'xl' => 1,
+    ];
 
     public function table(Table $table): Table
     {
         return $table
             ->query(
                 Attendance::query()
+                    ->with('user')
                     ->whereDate('date', Carbon::today())
                     ->whereNotNull('check_in')
                     ->latest('check_in')
             )
+            ->paginated([5, 10])
+            ->defaultPaginationPageOption(5)
             ->columns([
-                Tables\Columns\ImageColumn::make('check_in_photo')
-                    ->label('Foto Wajah')
+                Tables\Columns\ImageColumn::make('profile_photo')
+                    ->label('Foto Profil')
                     ->circular()
-                    ->defaultImageUrl(url('https://ui-avatars.com/api/?name=In&background=059669&color=fff')),
+                    ->state(function (Attendance $record): string {
+                        if ($record->user?->avatar) {
+                            return asset('storage/' . $record->user->avatar);
+                        }
+                        if ($record->check_in_photo) {
+                            return asset('storage/' . $record->check_in_photo);
+                        }
+                        return $record->user?->avatar_url ?? 'https://ui-avatars.com/api/?name=' . urlencode($record->user?->name ?? 'Pegawai') . '&background=059669&color=fff';
+                    }),
                 Tables\Columns\TextColumn::make('user.name')
                     ->label('Nama Pegawai')
                     ->weight('bold')
-                    ->description(fn (Attendance $record): string => $record->user->position ?? '-'),
-                Tables\Columns\TextColumn::make('user.department.name')
-                    ->label('Departemen')
-                    ->badge()
-                    ->color('info'),
+                    ->description(fn (Attendance $record): string => $record->user?->position ?? '-'),
                 Tables\Columns\TextColumn::make('check_in')
                     ->label('Jam Masuk')
                     ->time('H:i:s'),
                 Tables\Columns\TextColumn::make('check_in_status')
                     ->label('Status')
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state === 'late' ? 'Terlambat' : 'Tepat Waktu')
-                    ->color(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn ($state) => match ($state) {
+                        'late' => 'Terlambat',
+                        'on_time' => 'Tepat Waktu',
+                        default => $state ? ucfirst($state) : '-',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
                         'late' => 'danger',
                         'on_time' => 'success',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('gps')
-                    ->label('Jarak GPS')
-                    ->state(fn (Attendance $record): string => "{$record->check_in_distance} m dari kantor")
-                    ->badge()
-                    ->color(fn (Attendance $record): string => ($record->check_in_distance > ($record->office->radius_meters ?? 100)) ? 'danger' : 'success'),
-                Tables\Columns\TextColumn::make('check_out')
-                    ->label('Jam Pulang')
-                    ->time('H:i:s')
-                    ->placeholder('Masih Bekerja...'),
             ]);
     }
 }
