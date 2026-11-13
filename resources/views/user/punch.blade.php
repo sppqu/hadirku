@@ -92,12 +92,12 @@
             </div>
         </div>
 
-        <!-- Card 2: Informasi Radius & Koordinat GPS (Lengkap & Rapi Tanpa Duplikasi) -->
+        <!-- Card 2: Informasi Lokasi GPS -->
         <div class="bg-white rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-slate-100 space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                 <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5 uppercase tracking-wider">
                     <i class="fa-solid fa-location-crosshairs text-emerald-600"></i>
-                    <span>Informasi Radius & Koordinat</span>
+                    <span>Informasi Lokasi GPS</span>
                 </span>
                 <button type="button" onclick="getCurrentLocation()" class="text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition">
                     <i class="fa-solid fa-arrows-rotate"></i> Refresh GPS
@@ -115,22 +115,6 @@
                     <span id="gps-status-badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
                         Mengecek Lokasi...
                     </span>
-                </div>
-
-                <!-- Koordinat Kantor & Radius -->
-                <div class="grid grid-cols-2 gap-2 py-1">
-                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                        <span class="text-[10px] text-slate-400 font-medium block">Koordinat Kantor</span>
-                        <span class="text-[11px] font-mono font-bold text-slate-700 block mt-0.5">
-                            {{ number_format($office->latitude ?? -6.225014, 5) }}, {{ number_format($office->longitude ?? 106.809784, 5) }}
-                        </span>
-                    </div>
-                    <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                        <span class="text-[10px] text-slate-400 font-medium block">Batas Radius Kantor</span>
-                        <span class="text-[11px] font-bold text-emerald-700 block mt-0.5">
-                            {{ $office->radius_meters ?? 150 }} meter
-                        </span>
-                    </div>
                 </div>
 
                 <!-- Koordinat Anda & Jarak Realtime -->
