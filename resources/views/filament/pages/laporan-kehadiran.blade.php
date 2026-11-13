@@ -1209,13 +1209,19 @@
             .cell-out {
                 color: #444444 !important;
             }
+            /* Plain symbols S / I / A without badge box or border */
             .badge-sakit, .badge-izin, .badge-alpha {
-                border: 1px solid #000000 !important;
+                border: none !important;
                 background: transparent !important;
                 background-color: transparent !important;
                 color: #000000 !important;
-                padding: 0 2px !important;
-                font-size: 6pt !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                display: inline !important;
+                font-weight: 700 !important;
+                font-size: 7.2pt !important;
+                box-shadow: none !important;
             }
             .col-rekap-sub {
                 width: 18px !important;
@@ -1239,12 +1245,15 @@
                 padding: 3px 5px !important;
             }
             .status-badge {
-                border: 1px solid #000000 !important;
+                border: none !important;
                 background: transparent !important;
                 background-color: transparent !important;
                 color: #000000 !important;
-                padding: 1px 4px !important;
-                font-size: 6.5pt !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+                display: inline !important;
+                font-weight: 600 !important;
+                font-size: 7.5pt !important;
             }
 
             /* Sticky overrides in print */
@@ -1264,18 +1273,22 @@
                 color: #000000 !important;
                 page-break-inside: avoid !important;
             }
+            .legend-dot {
+                display: none !important;
+            }
             .legend-badge {
-                border: 1px solid #000000 !important;
+                border: none !important;
                 background: transparent !important;
                 background-color: transparent !important;
                 color: #000000 !important;
-                width: 14px !important;
-                height: 14px !important;
-                line-height: 14px !important;
-                font-size: 6pt !important;
+                width: auto !important;
+                height: auto !important;
+                line-height: normal !important;
+                display: inline !important;
+                font-weight: 700 !important;
+                font-size: 7.2pt !important;
+                padding: 0 !important;
             }
-            .legend-dot.ontime { background-color: #000000 !important; }
-            .legend-dot.late { background-color: #dc2626 !important; }
 
             /* Signatures in Print */
             .report-signatures-wrapper {
