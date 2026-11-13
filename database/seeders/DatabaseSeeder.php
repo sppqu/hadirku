@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Attendance;
 use App\Models\AttendanceLog;
+use App\Models\CampusProfile;
 use App\Models\Department;
 use App\Models\Leave;
 use App\Models\Office;
@@ -20,6 +21,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 0. Campus Profile
+        CampusProfile::current();
+
         // 1. Offices
         $office = Office::firstOrCreate(
             ['name' => 'Kantor Pusat HadirKU'],
