@@ -20,6 +20,11 @@
 
                     {{-- Informasi & Keterangan Kampus --}}
                     <div style="flex: 1; min-width: 260px;">
+                        @if($profile->foundation)
+                            <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #a7f3d0; margin-bottom: 0.2rem;">
+                                {{ $profile->foundation }}
+                            </div>
+                        @endif
                         <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;">
                             <h2 style="font-size: 1.5rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1.25; margin: 0; color: #ffffff;">{{ $profile->name }}</h2>
                             @if($profile->accreditation)

@@ -77,6 +77,13 @@ class CampusProfile extends Page implements HasForms
                                             ->maxLength(255)
                                             ->columnSpanFull(),
 
+                                        TextInput::make('foundation')
+                                            ->label('Yayasan / Badan Hukum Penyelenggara (Opsional)')
+                                            ->placeholder('Contoh: Yayasan Pembina Pendidikan Indonesia (Kosongkan jika PTN)')
+                                            ->helperText('Jika diisi, nama yayasan ini akan menggantikan baris "KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI" pada Kop Laporan.')
+                                            ->maxLength(255)
+                                            ->columnSpanFull(),
+
                                         TextInput::make('campus_code')
                                             ->label('Kode PT (PDDikti)')
                                             ->placeholder('Contoh: 041001')

@@ -12,6 +12,7 @@ class CampusProfile extends Model
 
     protected $fillable = [
         'name',
+        'foundation',
         'campus_code',
         'rector_name',
         'accreditation',
@@ -38,6 +39,7 @@ class CampusProfile extends Model
             ['id' => 1],
             [
                 'name' => 'Universitas HadirKU',
+                'foundation' => null,
                 'campus_code' => '041001',
                 'rector_name' => 'Prof. Dr. H. Irwan Santoso, M.Kom.',
                 'accreditation' => 'Unggul',
@@ -64,5 +66,10 @@ class CampusProfile extends Model
             return asset('images/logo.png');
         }
         return asset('images/logo.jpg');
+    }
+
+    public function getYayasanAttribute(): ?string
+    {
+        return $this->foundation;
     }
 }

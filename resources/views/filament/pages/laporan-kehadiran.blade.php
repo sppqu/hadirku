@@ -40,6 +40,7 @@
             $data = $this->reportData;
             $campus = $data['campus'] ?? null;
             $campusName = $campus?->name ?? 'UNIVERSITAS HADIRKU';
+            $campusFoundation = $campus?->foundation ?? null;
             $campusCode = $campus?->campus_code ?? '041001';
             $campusRector = $campus?->rector_name ?? 'Prof. Dr. H. Irwan Santoso, M.Kom.';
             $campusAccreditation = $campus?->accreditation ?? 'Unggul';
@@ -109,7 +110,7 @@
                         <img src="{{ $campusLogo }}" alt="Logo {{ $campusName }}" class="report-kop-logo" />
                     </div>
                     <div class="report-kop-details">
-                        <div class="kop-institution">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
+                        <div class="kop-institution">{{ !empty($campusFoundation) ? strtoupper($campusFoundation) : 'KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI' }}</div>
                         <div class="kop-campus-name">{{ strtoupper($campusName) }}</div>
                         <div class="kop-accreditation">
                             @if($campusCode)
