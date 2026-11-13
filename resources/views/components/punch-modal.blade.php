@@ -100,29 +100,39 @@
                 </div>
             </div>
 
-            <!-- GPS Geofencing Map Section -->
+            <!-- GPS Geofencing Info Section (Tanpa Map) -->
             <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
-                <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center justify-between mb-2.5">
                     <span class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
                         <i class="fa-solid fa-location-dot text-emerald-600"></i>
-                        <span>Geofencing & Lokasi GPS</span>
+                        <span>Informasi Lokasi & Geofencing</span>
                     </span>
-                    <button type="button" onclick="getCurrentLocation()" class="text-[10px] font-bold text-emerald-600 hover:underline flex items-center gap-1">
+                    <button type="button" onclick="getCurrentLocation()" class="text-[11px] font-semibold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition">
                         <i class="fa-solid fa-arrows-rotate"></i> Refresh GPS
                     </button>
                 </div>
 
-                <!-- Leaflet Map Canvas -->
-                <div id="punch-map" class="w-full h-40 rounded-xl overflow-hidden border border-slate-200 shadow-inner z-10"></div>
-
-                <!-- GPS Status Bar -->
-                <div class="mt-2.5 p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between text-xs">
-                    <div>
-                        <div class="text-[10px] text-slate-400 font-medium">Jarak ke Kantor:</div>
-                        <div id="gps-distance-text" class="font-extrabold text-slate-800">Menghitung...</div>
+                <!-- Info Jarak & Radius -->
+                <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-medium block">Kantor Presensi</span>
+                            <span class="text-xs font-bold text-slate-800">{{ $currentOffice->name ?? 'Kantor Pusat HadirKU' }}</span>
+                        </div>
+                        <div id="gps-status-badge" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                            Cek Lokasi...
+                        </div>
                     </div>
-                    <div id="gps-status-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800">
-                        Cek Lokasi
+
+                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <span class="text-[10px] text-slate-400 font-medium block">Jarak ke Kantor</span>
+                            <span id="gps-distance-text" class="text-xs font-extrabold text-slate-800 mt-0.5 block">Menghitung...</span>
+                        </div>
+                        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <span class="text-[10px] text-slate-400 font-medium block">Batas Radius</span>
+                            <span class="text-xs font-extrabold text-emerald-700 mt-0.5 block">{{ $currentOffice->radius_meters ?? 150 }} meter</span>
+                        </div>
                     </div>
                 </div>
 
@@ -173,10 +183,6 @@
     let capturedPhotoData = null;
     let currentLat = null;
     let currentLng = null;
-    let punchMap = null;
-    let userMarker = null;
-    let officeMarker = null;
-    let geofenceCircle = null;
 
     // Face detection & auto-snap state
     let trackerTask = null;
@@ -203,7 +209,6 @@
 
         document.getElementById('punch-modal').classList.remove('hidden');
         startCamera();
-        initMap();
         getCurrentLocation();
     }
 
@@ -451,36 +456,13 @@
         stopCamera();
     }
 
-    function initMap() {
-        if (punchMap) return;
-
-        setTimeout(() => {
-            punchMap = L.map('punch-map', { zoomControl: false }).setView([officeLat, officeLng], 16);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '© OpenStreetMap'
-            }).addTo(punchMap);
-
-            officeMarker = L.marker([officeLat, officeLng]).addTo(punchMap)
-                .bindPopup('<b>' + officeName + '</b><br>Titik Presensi Kantor');
-
-            geofenceCircle = L.circle([officeLat, officeLng], {
-                color: '#059669',
-                fillColor: '#10B981',
-                fillOpacity: 0.15,
-                radius: officeRadius
-            }).addTo(punchMap);
-        }, 200);
-    }
-
     function getCurrentLocation() {
         const distText = document.getElementById('gps-distance-text');
         const statusBadge = document.getElementById('gps-status-badge');
-        distText.innerText = 'Mencari sinyal GPS...';
+        if (distText) distText.innerText = 'Mencari sinyal GPS...';
 
         if (!navigator.geolocation) {
-            distText.innerText = 'GPS tidak didukung pada browser ini';
-            // Smooth office coordinate fallback
+            if (distText) distText.innerText = 'GPS tidak didukung browser ini';
             currentLat = officeLat + 0.00008;
             currentLng = officeLng + 0.00008;
             updateLocationView(currentLat, currentLng);
@@ -495,7 +477,6 @@
             },
             (err) => {
                 console.warn('GPS signal issue or denied:', err.message);
-                // Fallback location within office radius for development / PC testing
                 currentLat = officeLat + 0.00008;
                 currentLng = officeLng + 0.00008;
                 updateLocationView(currentLat, currentLng);
@@ -505,40 +486,25 @@
     }
 
     function updateLocationView(lat, lng) {
-        if (!punchMap) return;
-
-        if (userMarker) {
-            userMarker.setLatLng([lat, lng]);
-        } else {
-            const userIcon = L.divIcon({
-                className: 'custom-user-pin',
-                html: '<div class="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-lg animate-ping"></div><div class="w-4 h-4 rounded-full bg-blue-600 border-2 border-white shadow-lg -mt-4"></div>',
-                iconSize: [16, 16],
-                iconAnchor: [8, 8]
-            });
-            userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(punchMap)
-                .bindPopup('Posisi Anda Sekarang');
-        }
-
-        punchMap.setView([lat, lng], 16);
-
         const distance = calculateHaversine(lat, lng, officeLat, officeLng);
         const distText = document.getElementById('gps-distance-text');
         const statusBadge = document.getElementById('gps-status-badge');
         const outsideNotice = document.getElementById('outside-radius-notice');
 
-        distText.innerText = distance + ' meter dari kantor';
+        if (distText) {
+            distText.innerText = distance + ' meter dari kantor';
+        }
 
-        if (distance <= officeRadius) {
-            statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800';
-            statusBadge.innerText = '✓ Di Dalam Radius';
-            if (outsideNotice) outsideNotice.classList.add('hidden');
-            if (geofenceCircle) geofenceCircle.setStyle({ color: '#059669', fillColor: '#10B981' });
-        } else {
-            statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300';
-            statusBadge.innerText = '⚠️ Di Luar Radius (' + distance + 'm)';
-            if (outsideNotice) outsideNotice.classList.remove('hidden');
-            if (geofenceCircle) geofenceCircle.setStyle({ color: '#F59E0B', fillColor: '#F59E0B' });
+        if (statusBadge) {
+            if (distance <= officeRadius) {
+                statusBadge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800';
+                statusBadge.innerText = '✓ Di Dalam Radius';
+                if (outsideNotice) outsideNotice.classList.add('hidden');
+            } else {
+                statusBadge.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300';
+                statusBadge.innerText = '⚠️ Di Luar Radius (' + distance + 'm)';
+                if (outsideNotice) outsideNotice.classList.remove('hidden');
+            }
         }
     }
 
