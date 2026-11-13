@@ -78,7 +78,7 @@ class AuthController extends Controller
         if (! $login || ! $password) {
             return back()->withErrors([
                 'email' => 'Email / NIK dan kata sandi wajib diisi.',
-            ])->withInput();
+            ])->onlyInput('email', 'login');
         }
 
         $user = User::where('email', $login)
@@ -88,7 +88,7 @@ class AuthController extends Controller
         if (! $user || ! Hash::check($password, $user->password)) {
             return back()->withErrors([
                 'email' => 'Email / NIK atau kata sandi salah.',
-            ])->withInput();
+            ])->onlyInput('email', 'login');
         }
 
         if (! $user->is_active) {

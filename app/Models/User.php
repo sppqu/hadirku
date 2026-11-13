@@ -56,12 +56,13 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
-        // Super Admin selalu memiliki akses penuh ke panel admin
-        if ($this->email === 'admin@hadirku.com' || $this->id === 1) {
-            return true;
+        // Pengguna non-aktif dilarang keras mengakses panel
+        if (! (bool) $this->is_active) {
+            return false;
         }
 
-        return $this->role === 'admin' && (bool) $this->is_active;
+        // Hanya role admin (atau super admin id 1 yang aktif)
+        return $this->role === 'admin' || $this->id === 1;
     }
 
     public function department(): BelongsTo

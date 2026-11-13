@@ -324,7 +324,7 @@ class DashboardController extends Controller
             'type' => 'required|in:check_in,check_out',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
-            'photo' => 'required|string', // Base64 image data URL
+            'photo' => 'required|string|max:7000000', // Base64 image data URL (max ~5MB)
             'notes' => 'nullable|string',
         ]);
 
@@ -640,9 +640,10 @@ class DashboardController extends Controller
         }
 
         $request->validate([
-            'photo' => 'required|string',
+            'photo' => 'required|string|max:7000000',
         ], [
             'photo.required' => 'Foto wajah harus diambil terlebih dahulu.',
+            'photo.max' => 'Ukuran foto terlalu besar (maksimal ~5MB).',
         ]);
 
         if (! str_starts_with($request->photo, 'data:image')) {
