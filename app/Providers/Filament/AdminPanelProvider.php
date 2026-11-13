@@ -13,6 +13,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -38,6 +39,10 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Emerald,
                 'gray' => Color::Slate,
             ])
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn () => view('filament.components.login-footer')
+            )
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Profile')
