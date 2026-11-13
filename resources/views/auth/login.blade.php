@@ -133,11 +133,12 @@
                     </button>
                 </form>
             </div>
-        </div>
 
-        <!-- Footer -->
-        <div class="px-8 py-6 text-center text-xs text-slate-400">
-            &copy; {{ date('Y') }} HadirKU. All rights reserved.
+            <!-- Footer di Bawah Card Login -->
+            <div class="mt-6 mb-6 text-center text-xs text-slate-400 space-y-1">
+                <p>&copy; {{ date('Y') }} HadirKU. All rights reserved.</p>
+                <p class="text-[11px] text-slate-400">Powered by <span class="font-bold text-emerald-600">Gemasoft</span></p>
+            </div>
         </div>
     </div>
 
