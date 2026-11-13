@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Attendance;
+use App\Models\CampusProfile;
 use App\Models\Department;
 use App\Models\Holiday;
 use App\Models\Leave;
@@ -233,6 +234,18 @@ class LaporanKehadiran extends Page implements HasForms
             }
         }
 
+        $selectedDepartment = $this->department_id ? Department::find($this->department_id) : null;
+        $selectedUser = $this->user_id ? User::find($this->user_id) : null;
+
+        $campus = null;
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('campus_profiles')) {
+                $campus = CampusProfile::first() ?? CampusProfile::current();
+            }
+        } catch (\Throwable $e) {
+            $campus = null;
+        }
+
         return [
             'records' => $records,
             'total_hadir' => $totalHadir,
@@ -242,6 +255,9 @@ class LaporanKehadiran extends Page implements HasForms
             'is_all_employees' => $isAllEmployees,
             'dates' => $dates,
             'matrix_rows' => $matrixRows,
+            'selected_department' => $selectedDepartment,
+            'selected_user' => $selectedUser,
+            'campus' => $campus,
         ];
     }
 }

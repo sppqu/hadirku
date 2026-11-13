@@ -1,32 +1,57 @@
 <x-filament-panels::page>
     <div class="space-y-6">
-        {{-- Filter Card --}}
-        <x-filament::section>
-            <form wire:submit="filter" class="space-y-4">
-                {{ $this->form }}
+        {{-- Filter Card (Screen Only) --}}
+        <div class="no-print">
+            <x-filament::section>
+                <form wire:submit="filter" class="space-y-4">
+                    {{ $this->form }}
 
-                <div class="flex items-center gap-3 pt-2">
-                    <x-filament::button type="submit" icon="heroicon-m-funnel">
-                        Terapkan Filter
-                    </x-filament::button>
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+                        <div class="flex items-center gap-3">
+                            <x-filament::button type="submit" icon="heroicon-m-funnel">
+                                Terapkan Filter
+                            </x-filament::button>
 
-                    <button 
-                        type="button" 
-                        onclick="window.print()" 
-                        class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg shadow-sm transition gap-2"
-                    >
-                        <x-heroicon-m-printer class="w-5 h-5" />
-                        Cetak Laporan
-                    </button>
-                </div>
-            </form>
-        </x-filament::section>
+                            <button 
+                                type="button" 
+                                onclick="window.print()" 
+                                class="inline-flex items-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg shadow-sm transition gap-2 cursor-pointer"
+                            >
+                                <x-heroicon-m-printer class="w-5 h-5" />
+                                Cetak Laporan (Landscape)
+                            </button>
+                        </div>
 
-        {{-- Metrics Summary --}}
+                        <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300">
+                                Format: Landscape
+                            </span>
+                            <span>Cetak langsung dengan Kop Resmi Kampus & tabel rekapitulasi</span>
+                        </div>
+                    </div>
+                </form>
+            </x-filament::section>
+        </div>
+
+        {{-- Metrics Summary (Screen Only) --}}
         @php
             $data = $this->reportData;
+            $campus = $data['campus'] ?? null;
+            $campusName = $campus?->name ?? 'UNIVERSITAS HADIRKU';
+            $campusCode = $campus?->campus_code ?? '041001';
+            $campusRector = $campus?->rector_name ?? 'Prof. Dr. H. Irwan Santoso, M.Kom.';
+            $campusAccreditation = $campus?->accreditation ?? 'Unggul';
+            $campusEmail = $campus?->email ?? 'info@universitas.ac.id';
+            $campusPhone = $campus?->phone ?? '021-78901234';
+            $campusWebsite = $campus?->website ?? 'https://hadirku.ac.id';
+            $campusAddress = $campus?->address ?? 'Jl. Kampus Merdeka No. 100';
+            $campusCity = $campus?->city ?? 'Jakarta Selatan';
+            $campusProvince = $campus?->province ?? 'DKI Jakarta';
+            $campusPostalCode = $campus?->postal_code ?? '12190';
+            $campusLogo = $campus?->logo_url ?? asset('images/logo.png');
         @endphp
-        <div class="report-metrics-grid">
+
+        <div class="report-metrics-grid no-print">
             {{-- Total Kehadiran --}}
             <div class="bg-white dark:bg-gray-900" style="border: 1.5px solid #6366f1; border-radius: 1rem; padding: 1.15rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
                 <div>
@@ -72,84 +97,211 @@
             </div>
         </div>
 
-        {{-- Report Printable Table --}}
-        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden print-area">
-            {{-- Print Header --}}
-            <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                <div>
-                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Rekapitulasi Kehadiran Pegawai</h2>
-                    <p class="text-sm text-gray-500">Periode: {{ \Carbon\Carbon::parse($this->start_date)->translatedFormat('d F Y') }} - {{ \Carbon\Carbon::parse($this->end_date)->translatedFormat('d F Y') }}</p>
+        {{-- Printable Formal Report Container --}}
+        <div class="report-paper bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm print-area">
+            
+            {{-- Kop Surat Resmi Kampus --}}
+            <div class="report-kop-wrapper">
+                <div class="report-kop-content">
+                    <div class="report-kop-logo-box">
+                        <img src="{{ $campusLogo }}" alt="Logo {{ $campusName }}" class="report-kop-logo" />
+                    </div>
+                    <div class="report-kop-details">
+                        <div class="kop-institution">KEMENTERIAN PENDIDIKAN TINGGI, SAINS, DAN TEKNOLOGI</div>
+                        <div class="kop-campus-name">{{ strtoupper($campusName) }}</div>
+                        <div class="kop-accreditation">
+                            @if($campusCode)
+                                <span>Kode PT: {{ $campusCode }}</span>
+                            @endif
+                            @if($campusCode && $campusAccreditation)
+                                <span>&bull;</span>
+                            @endif
+                            @if($campusAccreditation)
+                                <span>Terakreditasi: {{ $campusAccreditation }}</span>
+                            @endif
+                        </div>
+                        <div class="kop-address">
+                            {{ $campusAddress }}{{ $campusCity ? ', ' . $campusCity : '' }}{{ $campusProvince ? ', ' . $campusProvince : '' }} {{ $campusPostalCode }}
+                        </div>
+                        <div class="kop-contacts">
+                            @if($campusPhone)
+                                <span>Telp: {{ $campusPhone }}</span>
+                            @endif
+                            @if($campusPhone && $campusEmail)
+                                <span>|</span>
+                            @endif
+                            @if($campusEmail)
+                                <span>Email: {{ $campusEmail }}</span>
+                            @endif
+                            @if(($campusPhone || $campusEmail) && $campusWebsite)
+                                <span>|</span>
+                            @endif
+                            @if($campusWebsite)
+                                <span>Laman: {{ $campusWebsite }}</span>
+                            @endif
+                        </div>
+                    </div>
                 </div>
-                <div class="text-right">
-                    <span class="text-xs px-3 py-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded-full font-semibold">HadirKU E-Presensi</span>
+
+                {{-- Garis Pembatas Kop Surat Resmi (Double Line) --}}
+                <div class="report-kop-separator">
+                    <div class="separator-thick"></div>
+                    <div class="separator-thin"></div>
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
+            {{-- Judul Laporan & Metadata Dokumen --}}
+            <div class="report-meta-wrapper">
+                <h1 class="report-doc-title">
+                    @if($data['is_all_employees'])
+                        LAPORAN REKAPITULASI KEHADIRAN PEGAWAI
+                    @else
+                        LAPORAN DETAIL KEHADIRAN PEGAWAI
+                    @endif
+                </h1>
+
+                <div class="report-meta-box">
+                    <div class="meta-col">
+                        <div class="meta-entry">
+                            <span class="meta-term">Periode</span>
+                            <span class="meta-colon">:</span>
+                            <span class="meta-desc font-bold">
+                                {{ \Carbon\Carbon::parse($this->start_date)->locale('id')->translatedFormat('d F Y') }}
+                                s/d
+                                {{ \Carbon\Carbon::parse($this->end_date)->locale('id')->translatedFormat('d F Y') }}
+                            </span>
+                        </div>
+                        <div class="meta-entry">
+                            <span class="meta-term">Unit Kerja / Dept</span>
+                            <span class="meta-colon">:</span>
+                            <span class="meta-desc">
+                                {{ $data['selected_department'] ? $data['selected_department']->name : 'Semua Unit Kerja / Departemen' }}
+                            </span>
+                        </div>
+                        @if(!$data['is_all_employees'] && !empty($data['selected_user']))
+                        <div class="meta-entry">
+                            <span class="meta-term">Nama Pegawai</span>
+                            <span class="meta-colon">:</span>
+                            <span class="meta-desc font-bold">
+                                {{ $data['selected_user']->name }} (NIK: {{ $data['selected_user']->nik ?? '-' }})
+                            </span>
+                        </div>
+                        @endif
+                    </div>
+                    <div class="meta-col">
+                        <div class="meta-entry">
+                            <span class="meta-term">Tanggal Cetak</span>
+                            <span class="meta-colon">:</span>
+                            <span class="meta-desc">
+                                {{ \Carbon\Carbon::now('Asia/Jakarta')->locale('id')->translatedFormat('d F Y - H:i:s') }} WIB
+                            </span>
+                        </div>
+                        <div class="meta-entry">
+                            <span class="meta-term">Dicetak Oleh</span>
+                            <span class="meta-colon">:</span>
+                            <span class="meta-desc">
+                                {{ auth()->user()->name ?? 'Administrator' }}
+                            </span>
+                        </div>
+                        <div class="meta-entry">
+                            <span class="meta-term">Status Dokumen</span>
+                            <span class="meta-colon">:</span>
+                            <span class="meta-desc font-semibold text-emerald-600 dark:text-emerald-400 print:text-black">
+                                Sah / Terverifikasi Sistem
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Ringkasan Presensi (Tabel Ringkas Versi Laporan) --}}
+            <div class="report-summary-container">
+                <table class="report-summary-table">
+                    <thead>
+                        <tr>
+                            <th>Total Hari Hadir</th>
+                            <th>Tepat Waktu</th>
+                            <th>Terlambat</th>
+                            <th>Total Akumulasi Jam Kerja</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>{{ $data['total_hadir'] }}</strong> Hari</td>
+                            <td><strong>{{ $data['total_tepat_waktu'] }}</strong> Kali</td>
+                            <td><strong>{{ $data['total_terlambat'] }}</strong> Kali</td>
+                            <td><strong>{{ $data['total_jam_kerja'] }}</strong> Jam</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            {{-- Tabel Data Kehadiran --}}
+            <div class="report-table-scroll overflow-x-auto">
                 @if($data['is_all_employees'])
-                    <table class="w-full text-xs text-left border-collapse">
-                        <thead class="text-[11px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-900 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
+                    <table class="report-table matrix-table">
+                        <thead>
                             <tr>
-                                <th rowspan="2" class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-700 text-center" style="min-width: 40px;">No</th>
-                                <th rowspan="2" class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-700 sticky left-0 bg-gray-50 dark:bg-gray-900 z-10" style="min-width: 170px;">Pegawai</th>
+                                <th rowspan="2" class="col-no">No</th>
+                                <th rowspan="2" class="col-pegawai">Pegawai</th>
                                 @foreach($data['dates'] as $d)
-                                    <th class="px-2 py-2 border-r border-gray-200 dark:border-gray-700 text-center whitespace-nowrap {{ $d['is_holiday'] || $d['is_sunday'] ? 'bg-red-50/70 dark:bg-red-950/30 text-red-500' : '' }}" style="min-width: 68px;" title="{{ $d['holiday_name'] ?? $d['date_str'] }}">
-                                        <div class="font-bold">{{ $d['day_num'] }} {{ $d['month_short'] }}</div>
-                                        <div class="text-[10px] font-normal opacity-80">{{ $d['day_short'] }}</div>
+                                    <th class="col-date {{ $d['is_holiday'] || $d['is_sunday'] ? 'day-off-header' : '' }}" title="{{ $d['holiday_name'] ?? $d['date_str'] }}">
+                                        <div class="day-num">{{ $d['day_num'] }} {{ $d['month_short'] }}</div>
+                                        <div class="day-name">{{ $d['day_short'] }}</div>
                                     </th>
                                 @endforeach
-                                <th colspan="4" class="px-2 py-1.5 text-center border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 font-bold">Rekap</th>
+                                <th colspan="4" class="col-rekap-title">Rekap</th>
                             </tr>
                             <tr>
                                 @foreach($data['dates'] as $d)
-                                    <th class="px-1 py-1 border-r border-gray-200 dark:border-gray-700 text-center text-[10px] font-medium text-gray-400 {{ $d['is_holiday'] || $d['is_sunday'] ? 'bg-red-50/70 dark:bg-red-950/30' : '' }}">
+                                    <th class="col-inout {{ $d['is_holiday'] || $d['is_sunday'] ? 'day-off-header' : '' }}">
                                         In / Out
                                     </th>
                                 @endforeach
-                                <th class="px-2.5 py-1.5 text-center border-r border-gray-200 dark:border-gray-700 bg-amber-50/50 dark:bg-amber-950/20 text-amber-600 dark:text-amber-400 font-bold" style="min-width: 36px;" title="Sakit">S</th>
-                                <th class="px-2.5 py-1.5 text-center border-r border-gray-200 dark:border-gray-700 bg-sky-50/50 dark:bg-sky-950/20 text-sky-600 dark:text-sky-400 font-bold" style="min-width: 36px;" title="Izin / Cuti">I</th>
-                                <th class="px-2.5 py-1.5 text-center border-r border-gray-200 dark:border-gray-700 bg-rose-50/50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400 font-bold" style="min-width: 36px;" title="Alpha">A</th>
-                                <th class="px-2.5 py-1.5 text-center bg-orange-50/50 dark:bg-orange-950/20 text-orange-600 dark:text-orange-400 font-bold" style="min-width: 36px;" title="Terlambat">T</th>
+                                <th class="col-rekap-sub rekap-s" title="Sakit">S</th>
+                                <th class="col-rekap-sub rekap-i" title="Izin / Cuti">I</th>
+                                <th class="col-rekap-sub rekap-a" title="Alpha">A</th>
+                                <th class="col-rekap-sub rekap-t" title="Terlambat">T</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody>
                             @forelse($data['matrix_rows'] as $idx => $row)
                                 @php $emp = $row['user']; @endphp
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/40">
-                                    <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-700 text-center text-gray-500">{{ $idx + 1 }}</td>
-                                    <td class="px-3 py-2.5 border-r border-gray-200 dark:border-gray-700 sticky left-0 bg-white dark:bg-gray-800 z-10">
-                                        <div class="font-semibold text-gray-900 dark:text-white whitespace-nowrap">{{ $emp->name }}</div>
-                                        <div class="text-[10px] text-gray-400 whitespace-nowrap">{{ $emp->nik ?? '-' }} &bull; {{ $emp->department->name ?? '-' }}</div>
+                                <tr>
+                                    <td class="cell-no">{{ $idx + 1 }}</td>
+                                    <td class="cell-pegawai">
+                                        <div class="emp-name">{{ $emp->name }}</div>
+                                        <div class="emp-info">{{ $emp->nik ?? '-' }} &bull; {{ $emp->department->name ?? '-' }}</div>
                                     </td>
                                     @foreach($data['dates'] as $d)
                                         @php $cell = $row['cells'][$d['date_str']] ?? ['type' => 'off', 'label' => '-']; @endphp
-                                        <td class="px-1.5 py-2 border-r border-gray-200 dark:border-gray-700 text-center whitespace-nowrap {{ $d['is_holiday'] || $d['is_sunday'] ? 'bg-red-50/30 dark:bg-red-950/15' : '' }}">
+                                        <td class="cell-date {{ $d['is_holiday'] || $d['is_sunday'] ? 'day-off-cell' : '' }}">
                                             @if($cell['type'] === 'present')
-                                                <div class="font-mono text-[11px] font-semibold {{ $cell['is_late'] ? 'text-rose-500' : 'text-emerald-500' }}">
-                                                    {{ $cell['in'] }}
+                                                <div class="cell-time cell-in {{ $cell['is_late'] ? 'cell-late' : 'cell-ontime' }}">
+                                                    {{ $cell['in'] }}@if($cell['is_late'])<span class="late-mark">*</span>@endif
                                                 </div>
-                                                <div class="font-mono text-[11px] text-gray-400">
+                                                <div class="cell-time cell-out">
                                                     {{ $cell['out'] }}
                                                 </div>
                                             @elseif($cell['type'] === 'sakit')
-                                                <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">S</span>
+                                                <span class="badge-sakit">S</span>
                                             @elseif($cell['type'] === 'izin')
-                                                <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300">I</span>
+                                                <span class="badge-izin">I</span>
                                             @elseif($cell['type'] === 'alpha')
-                                                <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">A</span>
+                                                <span class="badge-alpha">A</span>
                                             @else
-                                                <span class="text-gray-400 dark:text-gray-600">-</span>
+                                                <span class="cell-dash">-</span>
                                             @endif
                                         </td>
                                     @endforeach
-                                    <td class="px-2 py-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-amber-600 dark:text-amber-400">{{ $row['rekap']['S'] }}</td>
-                                    <td class="px-2 py-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-sky-600 dark:text-sky-400">{{ $row['rekap']['I'] }}</td>
-                                    <td class="px-2 py-2 border-r border-gray-200 dark:border-gray-700 text-center font-bold text-rose-600 dark:text-rose-400">{{ $row['rekap']['A'] }}</td>
-                                    <td class="px-2 py-2 text-center font-bold text-orange-600 dark:text-orange-400">{{ $row['rekap']['T'] }}</td>
+                                    <td class="cell-rekap font-bold text-amber-700 dark:text-amber-400 print:text-black">{{ $row['rekap']['S'] }}</td>
+                                    <td class="cell-rekap font-bold text-sky-700 dark:text-sky-400 print:text-black">{{ $row['rekap']['I'] }}</td>
+                                    <td class="cell-rekap font-bold text-rose-700 dark:text-rose-400 print:text-black">{{ $row['rekap']['A'] }}</td>
+                                    <td class="cell-rekap font-bold text-orange-700 dark:text-orange-400 print:text-black">{{ $row['rekap']['T'] }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ count($data['dates']) + 6 }}" class="px-4 py-8 text-center text-gray-500">
+                                    <td colspan="{{ count($data['dates']) + 6 }}" class="cell-empty">
                                         Tidak ada data pegawai pada filter ini.
                                     </td>
                                 </tr>
@@ -157,48 +309,50 @@
                         </tbody>
                     </table>
                 @else
-                    <table class="w-full text-sm text-left">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-900 dark:text-gray-300">
+                    <table class="report-table single-table">
+                        <thead>
                             <tr>
-                                <th class="px-4 py-3">Tanggal</th>
-                                <th class="px-4 py-3">NIK</th>
-                                <th class="px-4 py-3">Nama Pegawai</th>
-                                <th class="px-4 py-3">Departemen</th>
-                                <th class="px-4 py-3 text-center">Jam Masuk</th>
-                                <th class="px-4 py-3 text-center">Jam Pulang</th>
-                                <th class="px-4 py-3 text-center">Durasi</th>
-                                <th class="px-4 py-3 text-center">Status</th>
-                                <th class="px-4 py-3 text-center">Lokasi & GPS</th>
+                                <th class="col-no">No</th>
+                                <th>Tanggal</th>
+                                <th>NIK / NIP</th>
+                                <th>Nama Pegawai</th>
+                                <th>Departemen</th>
+                                <th class="text-center">Jam Masuk</th>
+                                <th class="text-center">Jam Pulang</th>
+                                <th class="text-center">Durasi</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Lokasi & Presensi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                            @forelse($data['records'] as $record)
-                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-900/50">
-                                    <td class="px-4 py-3 font-medium">{{ \Carbon\Carbon::parse($record->date)->translatedFormat('d M Y') }}</td>
-                                    <td class="px-4 py-3 text-gray-500">{{ $record->user->nik ?? '-' }}</td>
-                                    <td class="px-4 py-3 font-semibold text-gray-900 dark:text-white">{{ $record->user->name }}</td>
-                                    <td class="px-4 py-3 text-gray-500">{{ $record->user->department->name ?? '-' }}</td>
-                                    <td class="px-4 py-3 text-center">
-                                        <span class="font-mono">{{ $record->check_in ? date('H:i', strtotime($record->check_in)) : '-' }}</span>
+                        <tbody>
+                            @forelse($data['records'] as $idx => $record)
+                                <tr>
+                                    <td class="cell-no">{{ $idx + 1 }}</td>
+                                    <td class="whitespace-nowrap font-medium">{{ \Carbon\Carbon::parse($record->date)->locale('id')->translatedFormat('d M Y') }}</td>
+                                    <td class="font-mono text-xs">{{ $record->user->nik ?? '-' }}</td>
+                                    <td class="font-semibold">{{ $record->user->name }}</td>
+                                    <td>{{ $record->user->department->name ?? '-' }}</td>
+                                    <td class="text-center font-mono font-medium">
+                                        {{ $record->check_in ? date('H:i', strtotime($record->check_in)) : '-' }}
                                     </td>
-                                    <td class="px-4 py-3 text-center">
-                                        <span class="font-mono">{{ $record->check_out ? date('H:i', strtotime($record->check_out)) : '-' }}</span>
+                                    <td class="text-center font-mono">
+                                        {{ $record->check_out ? date('H:i', strtotime($record->check_out)) : '-' }}
                                     </td>
-                                    <td class="px-4 py-3 text-center font-mono">{{ $record->formatted_working_hours }}</td>
-                                    <td class="px-4 py-3 text-center">
+                                    <td class="text-center font-mono font-medium">{{ $record->formatted_working_hours }}</td>
+                                    <td class="text-center">
                                         @if($record->check_in_status === 'late')
-                                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">Terlambat</span>
+                                            <span class="status-badge status-late">Terlambat</span>
                                         @else
-                                            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">Tepat Waktu</span>
+                                            <span class="status-badge status-ontime">Tepat Waktu</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 text-center text-xs text-gray-500">
+                                    <td class="text-center text-xs">
                                         {{ $record->check_in_distance ? $record->check_in_distance . ' m' : 'Kantor' }}
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-4 py-8 text-center text-gray-500">
+                                    <td colspan="10" class="cell-empty">
                                         Tidak ada data kehadiran pada periode ini.
                                     </td>
                                 </tr>
@@ -208,20 +362,44 @@
                 @endif
             </div>
 
+            {{-- Keterangan / Legenda Status --}}
             @if($data['is_all_employees'])
-                <div class="px-6 py-3 border-t border-gray-200 dark:border-gray-700 bg-gray-50/60 dark:bg-gray-900/40 flex flex-wrap items-center gap-4 text-[11px] text-gray-500 dark:text-gray-400">
-                    <span><strong class="text-emerald-500">Hijau</strong> = Tepat Waktu (In / Out)</span>
-                    <span><strong class="text-rose-500">Merah</strong> = Terlambat</span>
-                    <span><strong class="text-amber-500">S</strong> = Sakit</span>
-                    <span><strong class="text-sky-500">I</strong> = Izin / Cuti</span>
-                    <span><strong class="text-rose-500">A</strong> = Alpha (Tidak Hadir)</span>
-                    <span><strong class="text-orange-500">T</strong> = Total Terlambat</span>
+                <div class="report-legend-box">
+                    <span class="font-bold">Keterangan:</span>
+                    <span class="legend-item"><span class="legend-dot ontime"></span> <strong>Tepat Waktu</strong> (Masuk / Pulang)</span>
+                    <span class="legend-item"><span class="legend-dot late"></span> <strong>Terlambat (*)</strong></span>
+                    <span class="legend-item"><span class="legend-badge badge-s">S</span> <strong>Sakit</strong></span>
+                    <span class="legend-item"><span class="legend-badge badge-i">I</span> <strong>Izin / Cuti</strong></span>
+                    <span class="legend-item"><span class="legend-badge badge-a">A</span> <strong>Alpha (Tidak Hadir)</strong></span>
+                    <span class="legend-item"><span class="legend-badge badge-t">T</span> <strong>Total Terlambat</strong></span>
+                    <span class="legend-item"><span class="legend-dash">-</span> <strong>Libur / Akhir Pekan</strong></span>
                 </div>
             @endif
+
+            {{-- Lembar Pengesahan / Kolom Tanda Tangan Resmi --}}
+            <div class="report-signatures-wrapper">
+                <div class="sig-block sig-left">
+                    <p class="sig-title">Mengetahui / Memeriksa,</p>
+                    <p class="sig-position">Kepala Bagian Kepegawaian & SDM</p>
+                    <div class="sig-space"></div>
+                    <p class="sig-name">( ................................................................ )</p>
+                    <p class="sig-nip">NIP. ................................................................</p>
+                </div>
+                <div class="sig-block sig-right">
+                    <p class="sig-date">{{ $campusCity }}, {{ \Carbon\Carbon::now('Asia/Jakarta')->locale('id')->translatedFormat('d F Y') }}</p>
+                    <p class="sig-position">Rektor / Pimpinan Perguruan Tinggi</p>
+                    <div class="sig-space"></div>
+                    <p class="sig-name"><strong>{{ $campusRector }}</strong></p>
+                    <p class="sig-nip">NIP/NIDN. {{ $campusCode ? $campusCode : '................................................................' }}</p>
+                </div>
+            </div>
+
         </div>
     </div>
 
+    {{-- Comprehensive Styling for Screen Preview & Landscape Official Report Printing --}}
     <style>
+        /* Screen Metrics Grid */
         .report-metrics-grid {
             display: grid;
             grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -237,18 +415,830 @@
                 grid-template-columns: repeat(4, minmax(0, 1fr));
             }
         }
+
+        /* Report Paper Screen Base */
+        .report-paper {
+            padding: 1.5rem;
+        }
+
+        /* Kop Surat */
+        .report-kop-wrapper {
+            margin-bottom: 1.25rem;
+        }
+        .report-kop-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            text-align: center;
+            padding-bottom: 0.75rem;
+        }
+        .report-kop-logo-box {
+            flex-shrink: 0;
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .report-kop-logo {
+            max-height: 80px;
+            max-width: 80px;
+            object-fit: contain;
+        }
+        .report-kop-details {
+            flex: 1;
+            min-width: 0;
+            color: #111827;
+        }
+        .dark .report-kop-details {
+            color: #f3f4f6;
+        }
+        .kop-institution {
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+        .kop-campus-name {
+            font-size: 1.35rem;
+            font-weight: 900;
+            letter-spacing: 0.025em;
+            line-height: 1.2;
+            margin: 0.15rem 0;
+        }
+        .kop-accreditation {
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+            opacity: 0.9;
+        }
+        .kop-address {
+            font-size: 0.75rem;
+            line-height: 1.35;
+            opacity: 0.85;
+        }
+        .kop-contacts {
+            font-size: 0.72rem;
+            margin-top: 0.15rem;
+            opacity: 0.8;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        /* Kop Separator Double Line */
+        .report-kop-separator {
+            margin-top: 0.5rem;
+        }
+        .separator-thick {
+            height: 2.5px;
+            background-color: #111827;
+            width: 100%;
+        }
+        .dark .separator-thick {
+            background-color: #9ca3af;
+        }
+        .separator-thin {
+            height: 1px;
+            background-color: #111827;
+            width: 100%;
+            margin-top: 2px;
+        }
+        .dark .separator-thin {
+            background-color: #9ca3af;
+        }
+
+        /* Document Title & Meta */
+        .report-meta-wrapper {
+            margin-bottom: 1.25rem;
+        }
+        .report-doc-title {
+            text-align: center;
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            color: #111827;
+            margin-bottom: 0.85rem;
+        }
+        .dark .report-doc-title {
+            color: #ffffff;
+        }
+        .report-meta-box {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+        }
+        .dark .report-meta-box {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+        @media (min-width: 640px) {
+            .report-meta-box {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 1.5rem;
+            }
+        }
+        .meta-entry {
+            display: flex;
+            align-items: baseline;
+            gap: 0.4rem;
+            margin-bottom: 0.2rem;
+        }
+        .meta-term {
+            width: 125px;
+            flex-shrink: 0;
+            font-weight: 600;
+            color: #4b5563;
+        }
+        .dark .meta-term {
+            color: #94a3b8;
+        }
+        .meta-colon {
+            flex-shrink: 0;
+            color: #6b7280;
+        }
+        .meta-desc {
+            flex: 1;
+            color: #111827;
+        }
+        .dark .meta-desc {
+            color: #f1f5f9;
+        }
+
+        /* Summary Table */
+        .report-summary-container {
+            margin-bottom: 1.25rem;
+        }
+        .report-summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        .report-summary-table th {
+            background-color: #f1f5f9;
+            color: #334155;
+            padding: 0.5rem;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+        }
+        .dark .report-summary-table th {
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border-color: #475569;
+        }
+        .report-summary-table td {
+            padding: 0.6rem;
+            border: 1px solid #cbd5e1;
+            font-size: 0.95rem;
+            color: #0f172a;
+        }
+        .dark .report-summary-table td {
+            border-color: #475569;
+            color: #f8fafc;
+        }
+
+        /* Main Report Table */
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+        .report-table th, .report-table td {
+            border: 1px solid #e2e8f0;
+        }
+        .dark .report-table th, .dark .report-table td {
+            border-color: #334155;
+        }
+        .report-table th {
+            background-color: #f8fafc;
+            color: #1e293b;
+            padding: 0.4rem 0.35rem;
+            font-weight: 700;
+            text-align: center;
+        }
+        .dark .report-table th {
+            background-color: #0f172a;
+            color: #f1f5f9;
+        }
+        .report-table td {
+            padding: 0.35rem 0.3rem;
+        }
+        .matrix-table {
+            font-size: 0.7rem;
+        }
+        .col-no {
+            width: 32px;
+            text-align: center;
+        }
+        .cell-no {
+            text-align: center;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .col-pegawai {
+            min-width: 140px;
+            max-width: 180px;
+            text-align: left !important;
+            padding-left: 0.5rem !important;
+        }
+        .cell-pegawai {
+            text-align: left;
+            padding-left: 0.5rem !important;
+            white-space: nowrap;
+        }
+        .emp-name {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .dark .emp-name {
+            color: #f8fafc;
+        }
+        .emp-info {
+            font-size: 0.65rem;
+            color: #64748b;
+        }
+        .dark .emp-info {
+            color: #94a3b8;
+        }
+        .col-date {
+            min-width: 48px;
+            padding: 0.25rem 0.15rem !important;
+            text-align: center;
+        }
+        .day-num {
+            font-weight: 700;
+            line-height: 1.1;
+        }
+        .day-name {
+            font-size: 0.62rem;
+            font-weight: 500;
+            opacity: 0.85;
+        }
+        .day-off-header {
+            background-color: #fee2e2 !important;
+            color: #b91c1c !important;
+        }
+        .dark .day-off-header {
+            background-color: #450a0a !important;
+            color: #fca5a5 !important;
+        }
+        .day-off-cell {
+            background-color: #fef2f2;
+        }
+        .dark .day-off-cell {
+            background-color: #270b0b;
+        }
+        .col-inout {
+            font-size: 0.6rem;
+            font-weight: 500;
+            color: #64748b;
+            padding: 0.15rem 0.1rem !important;
+        }
+        .col-rekap-title {
+            background-color: #e2e8f0 !important;
+            color: #1e293b !important;
+        }
+        .dark .col-rekap-title {
+            background-color: #1e293b !important;
+            color: #f1f5f9 !important;
+        }
+        .col-rekap-sub {
+            width: 28px;
+            padding: 0.25rem 0.15rem !important;
+            font-weight: 800 !important;
+        }
+        .rekap-s { background-color: #fef3c7 !important; color: #b45309 !important; }
+        .rekap-i { background-color: #e0f2fe !important; color: #0369a1 !important; }
+        .rekap-a { background-color: #ffe4e6 !important; color: #be123c !important; }
+        .rekap-t { background-color: #ffedd5 !important; color: #c2410c !important; }
+
+        .cell-date {
+            text-align: center;
+            padding: 0.2rem 0.15rem !important;
+            white-space: nowrap;
+        }
+        .cell-time {
+            font-family: monospace;
+            font-size: 0.68rem;
+            line-height: 1.15;
+        }
+        .cell-ontime {
+            color: #059669;
+            font-weight: 600;
+        }
+        .cell-late {
+            color: #dc2626;
+            font-weight: 700;
+        }
+        .late-mark {
+            color: #dc2626;
+            font-weight: 900;
+            margin-left: 1px;
+        }
+        .cell-out {
+            color: #64748b;
+        }
+        .dark .cell-out {
+            color: #94a3b8;
+        }
+        .badge-sakit, .badge-izin, .badge-alpha {
+            display: inline-block;
+            font-weight: 800;
+            font-size: 0.65rem;
+            padding: 0.1rem 0.35rem;
+            border-radius: 0.25rem;
+        }
+        .badge-sakit { background-color: #fef3c7; color: #92400e; }
+        .badge-izin { background-color: #e0f2fe; color: #075985; }
+        .badge-alpha { background-color: #fee2e2; color: #991b1b; }
+        .cell-dash {
+            color: #94a3b8;
+            font-size: 0.75rem;
+        }
+        .cell-rekap {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .cell-empty {
+            text-align: center;
+            padding: 2rem !important;
+            color: #64748b;
+        }
+
+        /* Single Table */
+        .single-table th {
+            padding: 0.6rem 0.5rem;
+        }
+        .single-table td {
+            padding: 0.5rem;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .status-ontime {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .status-late {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Legend */
+        .report-legend-box {
+            margin-top: 1rem;
+            padding: 0.65rem 0.85rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            font-size: 0.72rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            color: #334155;
+        }
+        .dark .report-legend-box {
+            background-color: #1e293b;
+            border-color: #334155;
+            color: #cbd5e1;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .legend-dot.ontime { background-color: #10b981; }
+        .legend-dot.late { background-color: #ef4444; }
+        .legend-badge {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            line-height: 18px;
+            text-align: center;
+            border-radius: 0.25rem;
+            font-size: 0.65rem;
+            font-weight: 800;
+        }
+        .badge-s { background-color: #fef3c7; color: #92400e; }
+        .badge-i { background-color: #e0f2fe; color: #075985; }
+        .badge-a { background-color: #fee2e2; color: #991b1b; }
+        .badge-t { background-color: #ffedd5; color: #9a3412; }
+        .legend-dash { color: #94a3b8; font-weight: bold; }
+
+        /* Signatures */
+        .report-signatures-wrapper {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+            page-break-inside: avoid;
+        }
+        .sig-block {
+            width: 280px;
+            font-size: 0.8rem;
+            color: #0f172a;
+        }
+        .dark .sig-block {
+            color: #f1f5f9;
+        }
+        .sig-left {
+            text-align: left;
+        }
+        .sig-right {
+            text-align: right;
+        }
+        .sig-title, .sig-date {
+            margin-bottom: 0.15rem;
+        }
+        .sig-position {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .sig-space {
+            height: 65px;
+        }
+        .sig-name {
+            font-size: 0.82rem;
+            line-height: 1.2;
+        }
+        .sig-nip {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 0.2rem;
+        }
+        .dark .sig-nip {
+            color: #94a3b8;
+        }
+
+        /* ==========================================================================
+           PRINT STYLES (LANDSCAPE ORIENTATION & FORMAL REPORT FORMAT)
+           ========================================================================== */
         @media print {
-            body * {
-                visibility: hidden;
+            /* Force landscape paper size with clean standard margins */
+            @page {
+                size: landscape;
+                margin: 8mm 10mm 10mm 10mm;
             }
-            .print-area, .print-area * {
-                visibility: visible;
+
+            /* Force browser print graphics & background colors */
+            *, *::before, *::after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                box-shadow: none !important;
+                text-shadow: none !important;
             }
-            .print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
+
+            /* Hide all Filament admin navigation chrome & web filters */
+            aside,
+            nav,
+            header,
+            footer,
+            .fi-topbar,
+            .fi-sidebar,
+            .fi-header,
+            .fi-page-header,
+            .fi-breadcrumbs,
+            .fi-form,
+            form,
+            .no-print,
+            .report-metrics-grid,
+            .fi-notifications,
+            .fi-modal,
+            .fi-dropdown {
+                display: none !important;
+            }
+
+            /* Reset all root containers to prevent overflow truncation & blank pages */
+            html,
+            body,
+            .fi-body,
+            .fi-layout,
+            .fi-main-ctn,
+            .fi-main,
+            .fi-page,
+            .fi-page-content,
+            .space-y-6 {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                border: none !important;
+                font-family: Arial, Helvetica, sans-serif !important;
+            }
+
+            /* Hide everything inside space-y-6 except print-area */
+            .space-y-6 > *:not(.print-area) {
+                display: none !important;
+            }
+
+            /* Style Printable Report Paper */
+            .print-area, .report-paper {
+                display: block !important;
+                position: static !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                overflow: visible !important;
+            }
+
+            /* Kop Surat in Print */
+            .report-kop-wrapper {
+                margin-bottom: 8px !important;
+                page-break-inside: avoid !important;
+            }
+            .report-kop-content {
+                gap: 16px !important;
+                padding-bottom: 6px !important;
+            }
+            .report-kop-logo-box {
+                width: 70px !important;
+            }
+            .report-kop-logo {
+                max-height: 65px !important;
+                max-width: 65px !important;
+            }
+            .report-kop-details {
+                color: #000000 !important;
+            }
+            .kop-institution {
+                font-size: 8.5pt !important;
+                color: #000000 !important;
+            }
+            .kop-campus-name {
+                font-size: 13.5pt !important;
+                color: #000000 !important;
+                margin: 1px 0 !important;
+            }
+            .kop-accreditation, .kop-address, .kop-contacts {
+                font-size: 7.5pt !important;
+                color: #222222 !important;
+            }
+            .separator-thick {
+                height: 2.5px !important;
+                background-color: #000000 !important;
+            }
+            .separator-thin {
+                height: 1px !important;
+                background-color: #000000 !important;
+                margin-top: 1.5px !important;
+            }
+
+            /* Document Title & Meta in Print */
+            .report-meta-wrapper {
+                margin-bottom: 8px !important;
+                page-break-inside: avoid !important;
+            }
+            .report-doc-title {
+                font-size: 11pt !important;
+                color: #000000 !important;
+                margin-bottom: 6px !important;
+            }
+            .report-meta-box {
+                background-color: #ffffff !important;
+                border: 1px solid #666666 !important;
+                border-radius: 0 !important;
+                padding: 4px 8px !important;
+                font-size: 7.5pt !important;
+                color: #000000 !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 10px !important;
+            }
+            .meta-term {
+                width: 95px !important;
+                color: #000000 !important;
+            }
+            .meta-desc {
+                color: #000000 !important;
+            }
+
+            /* Summary Table in Print */
+            .report-summary-container {
+                margin-bottom: 8px !important;
+                page-break-inside: avoid !important;
+            }
+            .report-summary-table {
+                font-size: 7.5pt !important;
+            }
+            .report-summary-table th {
+                background-color: #f1f5f9 !important;
+                color: #000000 !important;
+                border: 1px solid #333333 !important;
+                padding: 3px 6px !important;
+            }
+            .report-summary-table td {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+                border: 1px solid #333333 !important;
+                padding: 4px 6px !important;
+                font-size: 8.5pt !important;
+            }
+
+            /* Main Tables in Print */
+            .report-table-scroll, .overflow-x-auto {
+                overflow: visible !important;
+                width: 100% !important;
+            }
+            .report-table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                table-layout: auto !important;
+            }
+            .matrix-table {
+                font-size: 6.8pt !important;
+                line-height: 1.15 !important;
+            }
+            .report-table th, .report-table td {
+                border: 1px solid #333333 !important;
+                color: #000000 !important;
+            }
+            .report-table th {
+                background-color: #f1f5f9 !important;
+                color: #000000 !important;
+                padding: 2.5px 1.5px !important;
+            }
+            .report-table td {
+                padding: 2px 1.5px !important;
+                background-color: #ffffff !important;
+            }
+
+            /* Multi-page table headers */
+            thead {
+                display: table-header-group !important;
+            }
+            tr {
+                page-break-inside: avoid !important;
+            }
+
+            /* Column sizing in matrix print */
+            .col-no {
+                width: 22px !important;
+            }
+            .col-pegawai {
+                width: 120px !important;
+                max-width: 120px !important;
+                white-space: normal !important;
+            }
+            .emp-name {
+                font-size: 7pt !important;
+                color: #000000 !important;
+            }
+            .emp-info {
+                font-size: 5.8pt !important;
+                color: #333333 !important;
+            }
+            .col-date {
+                min-width: auto !important;
+                padding: 1.5px 0.5px !important;
+            }
+            .day-num {
+                font-size: 6.5pt !important;
+            }
+            .day-name {
+                font-size: 5.5pt !important;
+            }
+            .col-inout {
+                font-size: 5.5pt !important;
+            }
+            .day-off-header {
+                background-color: #e5e7eb !important;
+                color: #000000 !important;
+            }
+            .day-off-cell {
+                background-color: #f3f4f6 !important;
+            }
+            .cell-time {
+                font-size: 6.2pt !important;
+                line-height: 1.1 !important;
+            }
+            .cell-ontime {
+                color: #000000 !important;
+            }
+            .cell-late {
+                color: #dc2626 !important;
+                font-weight: 800 !important;
+            }
+            .late-mark {
+                color: #dc2626 !important;
+                font-weight: 900 !important;
+            }
+            .cell-out {
+                color: #444444 !important;
+            }
+            .badge-sakit, .badge-izin, .badge-alpha {
+                border: 1px solid #333333 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 2px !important;
+                font-size: 6pt !important;
+            }
+            .col-rekap-sub {
+                width: 18px !important;
+                padding: 1.5px 0.5px !important;
+            }
+            .rekap-s, .rekap-i, .rekap-a, .rekap-t {
+                background-color: #f1f5f9 !important;
+                color: #000000 !important;
+            }
+            .cell-rekap {
+                color: #000000 !important;
+                font-size: 7pt !important;
+            }
+
+            /* Single employee table in print */
+            .single-table {
+                font-size: 7.5pt !important;
+            }
+            .single-table th, .single-table td {
+                padding: 3px 5px !important;
+            }
+            .status-badge {
+                border: 1px solid #333333 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 1px 4px !important;
+                font-size: 6.5pt !important;
+            }
+
+            /* Sticky overrides in print */
+            .sticky {
+                position: static !important;
+            }
+
+            /* Legend in Print */
+            .report-legend-box {
+                margin-top: 8px !important;
+                padding: 4px 6px !important;
+                background-color: #ffffff !important;
+                border: 1px solid #666666 !important;
+                border-radius: 0 !important;
+                font-size: 6.8pt !important;
+                color: #000000 !important;
+                page-break-inside: avoid !important;
+            }
+            .legend-badge {
+                border: 1px solid #333333 !important;
+                background: #ffffff !important;
+                color: #000000 !important;
+                width: 14px !important;
+                height: 14px !important;
+                line-height: 14px !important;
+                font-size: 6pt !important;
+            }
+            .legend-dot.ontime { background-color: #000000 !important; }
+            .legend-dot.late { background-color: #dc2626 !important; }
+
+            /* Signatures in Print */
+            .report-signatures-wrapper {
+                margin-top: 18px !important;
+                page-break-inside: avoid !important;
+            }
+            .sig-block {
+                width: 250px !important;
+                font-size: 7.5pt !important;
+                color: #000000 !important;
+            }
+            .sig-space {
+                height: 50px !important;
+            }
+            .sig-name {
+                font-size: 7.8pt !important;
+                color: #000000 !important;
+            }
+            .sig-nip {
+                font-size: 6.8pt !important;
+                color: #333333 !important;
             }
         }
     </style>

@@ -59,6 +59,9 @@ class CampusProfile extends Model
         if ($this->logo) {
             return asset('storage/' . $this->logo);
         }
+        if (file_exists(public_path('images/logo.png'))) {
+            return asset('images/logo.png');
+        }
         return asset('images/logo.jpg');
     }
 }
