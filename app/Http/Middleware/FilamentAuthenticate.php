@@ -26,9 +26,7 @@ class FilamentAuthenticate extends BaseAuthenticate
         $user = $guard->user();
         $panel = Filament::getCurrentPanel();
 
-        $canAccess = $user instanceof FilamentUser ?
-            $user->canAccessPanel($panel) :
-            (config('app.env') === 'local');
+        $canAccess = $user instanceof FilamentUser && $user->canAccessPanel($panel);
 
         if (! $canAccess) {
             // Jika user saat ini bukan admin (misalnya sedang login sebagai pegawai di browser),

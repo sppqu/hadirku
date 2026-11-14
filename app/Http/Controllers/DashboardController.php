@@ -355,7 +355,17 @@ class DashboardController extends Controller
         if ($request->photo && str_starts_with($request->photo, 'data:image')) {
             $imageData = preg_replace('#^data:image/\w+;base64,#i', '', $request->photo);
             $imageData = base64_decode($imageData);
-            $fileName = 'attendances/' . $user->id . '_' . time() . '_' . $request->type . '.jpg';
+
+            // Validasi byte gambar asli (bukan file berbahaya yang disamarkan)
+            if (! $imageData || ! @getimagesizefromstring($imageData)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Berkas foto tidak valid atau rusak.',
+                ], 422);
+            }
+
+            // Gunakan string acak agar nama berkas tidak mudah ditebak
+            $fileName = 'attendances/' . $user->id . '_' . \Illuminate\Support\Str::random(24) . '_' . $request->type . '.jpg';
             Storage::disk('public')->put($fileName, $imageData);
             $photoPath = $fileName;
         }
@@ -603,11 +613,11 @@ class DashboardController extends Controller
     {
         $request->validate([
             'current_password' => 'required|string',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:8|confirmed',
         ], [
             'current_password.required' => 'Kata sandi saat ini wajib diisi.',
             'password.required' => 'Kata sandi baru wajib diisi.',
-            'password.min' => 'Kata sandi baru minimal 6 karakter.',
+            'password.min' => 'Kata sandi baru minimal 8 karakter.',
             'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
         ]);
 
@@ -656,10 +666,10 @@ class DashboardController extends Controller
         $imageData = preg_replace('#^data:image/\w+;base64,#i', '', $request->photo);
         $imageData = base64_decode($imageData);
 
-        if (! $imageData) {
+        if (! $imageData || ! @getimagesizefromstring($imageData)) {
             return response()->json([
                 'success' => false,
-                'message' => 'Data gambar tidak dapat diproses.',
+                'message' => 'Berkas gambar wajah tidak valid atau rusak.',
             ], 422);
         }
 
@@ -668,8 +678,8 @@ class DashboardController extends Controller
             Storage::disk('public')->delete($user->pending_face_reference);
         }
 
-        // Simpan foto pengajuan wajah ke disk public
-        $fileName = 'faces/' . $user->id . '_pending_' . time() . '.jpg';
+        // Simpan foto pengajuan wajah ke disk public dengan nama acak
+        $fileName = 'faces/' . $user->id . '_pending_' . \Illuminate\Support\Str::random(24) . '.jpg';
         Storage::disk('public')->put($fileName, $imageData);
 
         // Update status menjadi pending, dan KUNCI izin registrasi sampai admin memverifikasi
